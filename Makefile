@@ -751,14 +751,6 @@ ifdef CONFIG_KCOV
 endif
 
 ifeq ($(cc-name),clang)
-ifeq ($(shell $(CC) -v 2>&1 | grep -c "clang version"), 1)
-COMPILER := clang
-else
-COMPILER := gcc
-endif
-export COMPILER
-
-ifeq ($(COMPILER),clang)
 KBUILD_CPPFLAGS += $(call cc-option,-Qunused-arguments,)
 KBUILD_CFLAGS += $(call cc-disable-warning, unused-variable)
 KBUILD_CFLAGS += $(call cc-disable-warning, format-invalid-specifier)
