@@ -893,10 +893,6 @@ config QCOM_SMCINVOKE
 	help
 	  Enable SMCInvoke driver which supports capability based secure
 	  communication between QSEE and HLOS.
-config SERIAL_NUM
-	bool "Enable Serial Number Proc Interface"
-	help
-	  Provide a interface for reading CPU serial number
 
 config QCOM_EARLY_RANDOM
 	bool "Initialize random pool very early"
@@ -914,6 +910,15 @@ config WCD_DSP_GLINK
 	   This option enables driver which provides communication interface
 	   between MSM and WCD DSP over glink transport protocol. This driver
 	   provides read and write interface via char device.
+
+config SERIAL_NUM
+	bool "Enable Serial Number Proc Interface"
+	help
+	Provide a interface for reading CPU serial number
+
+config STATE_NOTIFIER
+        bool "State Notifier"
+	default y
 
 source "drivers/soc/qcom/memshare/Kconfig"
 
