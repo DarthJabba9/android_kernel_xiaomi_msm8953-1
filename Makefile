@@ -664,11 +664,7 @@ KBUILD_CFLAGS	+= $(call cc-disable-warning, attribute-alias)
 KBUILD_CFLAGS   += $(call cc-option,-fno-store-merging,)
 
 ifdef CONFIG_CC_OPTIMIZE_FOR_SIZE
-KBUILD_CFLAGS	+= $(call cc-option,-Oz,-Os)
-KBUILD_CFLAGS	+= $(call cc-disable-warning,maybe-uninitialized,)
-else
-ifeq ($(cc-name),clang)
-KBUILD_CFLAGS	+= -O3
+KBUILD_CFLAGS	+= $(call cc-option,-Oz,-Os) $(call cc-disable-warning,maybe-uninitialized,)
 else
 KBUILD_CFLAGS	+= -O2
 endif
