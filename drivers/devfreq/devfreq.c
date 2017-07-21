@@ -25,6 +25,7 @@
 #include <linux/list.h>
 #include <linux/printk.h>
 #include <linux/hrtimer.h>
+#include <linux/state_notifier.h>
 #include "governor.h"
 
 static struct class *devfreq_class;
@@ -41,6 +42,17 @@ static LIST_HEAD(devfreq_governor_list);
 /* The list of all device-devfreq */
 static LIST_HEAD(devfreq_list);
 static DEFINE_MUTEX(devfreq_list_lock);
+
+/* List of devices to boost when the screen is woken */
+static const char *boost_devices[] = {
+	"soc:qcom,cpubw",
+};
+
+#define WAKE_BOOST_DURATION_MS (5000)
+static struct delayed_work wake_unboost_work;
+static struct work_struct wake_boost_work;
+
+static struct notifier_block notif;
 
 /**
  * find_device_devfreq() - find devfreq struct using device pointer
@@ -1082,8 +1094,63 @@ static struct attribute *devfreq_attrs[] = {
 };
 ATTRIBUTE_GROUPS(devfreq);
 
+static void set_wake_boost(bool enable)
+{
+	struct devfreq *df;
+
+	mutex_lock(&devfreq_list_lock);
+	list_for_each_entry(df, &devfreq_list, node) {
+		if (!df->needs_wake_boost)
+			continue;
+
+/*
+		pr_info("Device: %s Boost: %d\n", dev_name(&df->dev),
+				enable);
+*/
+
+		mutex_lock(&df->lock);
+		df->do_wake_boost = enable;
+		update_devfreq(df);
+		mutex_unlock(&df->lock);
+	}
+	mutex_unlock(&devfreq_list_lock);
+}
+
+static void wake_boost_fn(struct work_struct *work)
+{
+	set_wake_boost(true);
+	schedule_delayed_work(&wake_unboost_work,
+			msecs_to_jiffies(WAKE_BOOST_DURATION_MS));
+}
+
+static void wake_unboost_fn(struct work_struct *work)
+{
+	set_wake_boost(false);
+}
+
+static int state_notifier_callback(struct notifier_block *this,
+				unsigned long event, void *data)
+{
+	switch (event) {
+		case STATE_NOTIFIER_ACTIVE:
+			schedule_work(&wake_boost_work);
+			break;
+		case STATE_NOTIFIER_SUSPEND:
+			cancel_work_sync(&wake_boost_work);
+			if (cancel_delayed_work_sync(&wake_unboost_work))
+				set_wake_boost(false);
+			break;
+		default:
+			break;
+	}
+
+	return NOTIFY_OK;
+}
+
 static int __init devfreq_init(void)
 {
+	int ret = 0;
+
 	devfreq_class = class_create(THIS_MODULE, "devfreq");
 	if (IS_ERR(devfreq_class)) {
 		pr_err("%s: couldn't create class\n", __FILE__);
@@ -1100,7 +1167,12 @@ static int __init devfreq_init(void)
 	}
 	devfreq_class->dev_groups = devfreq_groups;
 
-	return 0;
+	INIT_WORK(&wake_boost_work, wake_boost_fn);
+	INIT_DELAYED_WORK(&wake_unboost_work, wake_unboost_fn);
+	notif.notifier_call = state_notifier_callback;
+	ret = state_register_client(&notif);
+
+	return ret;
 }
 subsys_initcall(devfreq_init);
 
