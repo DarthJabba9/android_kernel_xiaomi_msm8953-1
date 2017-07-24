@@ -52,8 +52,6 @@ static const char *boost_devices[] = {
 static struct delayed_work wake_unboost_work;
 static struct work_struct wake_boost_work;
 
-static struct notifier_block notif;
-
 /**
  * find_device_devfreq() - find devfreq struct using device pointer
  * @dev:	device pointer used to lookup device devfreq.
