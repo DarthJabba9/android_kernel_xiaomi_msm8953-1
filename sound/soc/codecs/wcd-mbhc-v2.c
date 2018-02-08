@@ -1516,6 +1516,8 @@ exit:
 		mbhc->mbhc_cb->hph_pull_down_ctrl (codec, true);
 
 	mbhc->mbhc_cb->lock_sleep(mbhc, false);
+	schedule_delayed_work(&mbhc->mbhc_btn_delay_dwork,
+					msecs_to_jiffies(750));
 	pr_debug("%s: leave\n", __func__);
 }
 
@@ -2075,6 +2077,9 @@ static irqreturn_t wcd_mbhc_btn_press_handler (int irq, void *data)
 				__func__);
 		goto done;
 	}
+	/* Don't process button interrupts immediately after plug detection */
+	if (mbhc->ignore_btn_intr)
+		goto done;
 	mbhc->buttons_pressed |= mask;
 	mbhc->mbhc_cb->lock_sleep (mbhc, true);
 	if (schedule_delayed_work (&mbhc->mbhc_btn_dwork,
@@ -2125,6 +2130,12 @@ static irqreturn_t wcd_mbhc_release_handler (int irq, void *data)
 
 		goto exit;
 
+	}
+	/* Don't process button interrupts immediately after plug detection */
+	if (mbhc->ignore_btn_intr) {
+		wcd_cancel_btn_work(mbhc);
+		mbhc->buttons_pressed &= ~WCD_MBHC_JACK_BUTTON_MASK;
+		goto exit;
 	}
 	if (mbhc->buttons_pressed & WCD_MBHC_JACK_BUTTON_MASK) {
 		ret = wcd_cancel_btn_work (mbhc);
@@ -2585,6 +2596,8 @@ int wcd_mbhc_init (struct wcd_mbhc *mbhc, struct snd_soc_codec *codec,
 		INIT_DELAYED_WORK (&mbhc->mbhc_firmware_dwork,
 				  wcd_mbhc_fw_read);
 		INIT_DELAYED_WORK(&mbhc->mbhc_btn_dwork, wcd_btn_lpress_fn);
+		INIT_DELAYED_WORK(&mbhc->mbhc_btn_delay_dwork,
+						wcd_headset_btn_delay);
 	}
 	mutex_init (&mbhc->hphl_pa_lock);
 	mutex_init (&mbhc->hphr_pa_lock);
