@@ -3900,17 +3900,28 @@ static int msm8x16_wcd_codec_config_compander(struct snd_soc_codec *codec,
 	}
 
 	/* compander is not enabled */
-	if (!msm8x16_wcd->comp_enabled[interp_n]) {
-		if (interp_n < MSM8X16_WCD_RX3)
-			if (get_codec_version(msm8x16_wcd) >= DIANGU)
-				snd_soc_update_bits(codec,
-					MSM8X16_WCD_A_ANALOG_RX_COM_BIAS_DAC,
-					0x08, 0x00);
+	if (!msm8x16_wcd->comp_enabled[interp_n])
 		return 0;
-	}
 
-	if (SND_SOC_DAPM_EVENT_ON(event)) {
-		if (get_codec_version(msm8x16_wcd) >= DIANGU)
+	switch (msm8x16_wcd->comp_enabled[interp_n]) {
+	case COMPANDER_1:
+		if (SND_SOC_DAPM_EVENT_ON(event)) {
+			/* Enable Compander Clock */
+			snd_soc_update_bits(codec,
+				MSM8X16_WCD_A_CDC_COMP0_B2_CTL, 0x0F, 0x09);
+			snd_soc_update_bits(codec,
+				MSM8X16_WCD_A_CDC_CLK_RX_B2_CTL, 0x01, 0x01);
+			snd_soc_update_bits(codec,
+				MSM8X16_WCD_A_CDC_COMP0_B1_CTL,
+				1 << interp_n, 1 << interp_n);
+			snd_soc_update_bits(codec,
+				MSM8X16_WCD_A_CDC_COMP0_B3_CTL, 0xFF, 0x01);
+			snd_soc_update_bits(codec,
+				MSM8X16_WCD_A_CDC_COMP0_B2_CTL, 0xF0, 0x50);
+			/* add sleep for compander to settle */
+			usleep_range(1000, 1100);
+			snd_soc_update_bits(codec,
+				MSM8X16_WCD_A_CDC_COMP0_B3_CTL, 0xFF, 0x28);
 			snd_soc_update_bits(codec,
 				MSM8X16_WCD_A_ANALOG_RX_COM_BIAS_DAC,
 				0x08, 0x08);
@@ -4093,6 +4104,11 @@ void wcd_imped_config(struct snd_soc_codec *codec,
 			 __func__);
 		return;
 	}
+	if (value >= wcd_imped_val[ARRAY_SIZE(wcd_imped_val) - 1]) {
+		pr_err("%s, invalid imped, greater than 48 Ohm\n = %d\n",
+			__func__, value);
+		return;
+	}
 
 	codec_version = get_codec_version(msm8x16_wcd);
 
@@ -4103,9 +4119,9 @@ void wcd_imped_config(struct snd_soc_codec *codec,
 		case CONGA:
 			/*
 			 * For 32Ohm load and higher loads, Set 0x19E
-			 * bit 5 to 1 (POS_0_DB_DI). For loads lower
+			 * bit 5 to 1 (POS_6_DB_DI). For loads lower
 			 * than 32Ohm (such as 16Ohm load), Set 0x19E
-			 * bit 5 to 0 (POS_M4P5_DB_DI)
+			 * bit 5 to 0 (POS_1P5_DB_DI)
 			 */
 			if (value >= 32)
 				snd_soc_update_bits(codec,
@@ -4464,6 +4480,7 @@ static const struct snd_soc_dapm_route audio_map[] = {
 	{"LINE_OUT", "Switch", "LINEOUT DAC"},
 	{"LINEOUT DAC", NULL, "RX3 CHAIN"},
 	{ "Ext Spk", NULL, "LINEOUT PA"},
+
 	/* lineout to WSA */
 	{"WSA_SPK OUT", NULL, "LINEOUT PA"},
 
@@ -5496,20 +5513,13 @@ static int msm8x16_wcd_device_down(struct snd_soc_codec *codec)
 	struct msm8x16_wcd_priv *msm8x16_wcd_priv =
 		snd_soc_codec_get_drvdata(codec);
 	int i;
-	unsigned int tx_1_en;
-	unsigned int tx_2_en;
 
 	pdata = snd_soc_card_get_drvdata(codec->component.card);
 	dev_dbg(codec->dev, "%s: device down!\n", __func__);
-
-	tx_1_en = msm8x16_wcd_read(codec, MSM8X16_WCD_A_ANALOG_TX_1_EN);
-	tx_2_en = msm8x16_wcd_read(codec, MSM8X16_WCD_A_ANALOG_TX_2_EN);
-	tx_1_en = tx_1_en & 0x7f;
-	tx_2_en = tx_2_en & 0x7f;
 	msm8x16_wcd_write(codec,
-		MSM8X16_WCD_A_ANALOG_TX_1_EN, tx_1_en);
+		MSM8X16_WCD_A_ANALOG_TX_1_EN, 0x3);
 	msm8x16_wcd_write(codec,
-		MSM8X16_WCD_A_ANALOG_TX_2_EN, tx_2_en);
+		MSM8X16_WCD_A_ANALOG_TX_2_EN, 0x3);
 	if (msm8x16_wcd_priv->boost_option == BOOST_ON_FOREVER) {
 		if ((snd_soc_read(codec, MSM8X16_WCD_A_ANALOG_SPKR_DRV_CTL)
 			& 0x80) == 0) {
@@ -5764,7 +5774,6 @@ static int msm8x16_wcd_codec_probe(struct snd_soc_codec *codec)
 	struct msm8x16_wcd *msm8x16_wcd;
 	struct msm8x16_wcd_pdata *pdata;
 	int i, ret;
-	const char *subsys_name = NULL;
 
 	dev_dbg(codec->dev, "%s()\n", __func__);
 
@@ -5894,19 +5903,9 @@ static int msm8x16_wcd_codec_probe(struct snd_soc_codec *codec)
 	/* Set initial cap mode */
 	msm8x16_wcd_configure_cap(codec, false, false);
 	registered_codec = codec;
-	ret = of_property_read_string(codec->dev->of_node,
-				"qcom,subsys-name",
-				&subsys_name);
-	if (ret) {
-		dev_dbg(codec->dev, "missing subsys-name entry in dt node\n");
-		adsp_state_notifier =
-			subsys_notif_register_notifier("adsp",
-			&adsp_state_notifier_block);
-	} else {
-		adsp_state_notifier =
-			subsys_notif_register_notifier(subsys_name,
-			&adsp_state_notifier_block);
-	}
+	adsp_state_notifier =
+	    subsys_notif_register_notifier("adsp",
+					   &adsp_state_notifier_block);
 	if (!adsp_state_notifier) {
 		dev_err(codec->dev, "Failed to register adsp state notifier\n");
 		iounmap(msm8x16_wcd->dig_base);
