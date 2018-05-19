@@ -4564,7 +4564,7 @@ static void smbchg_cool_limit_work(struct work_struct *work)
 	}
 	if (temp > 50 && temp < 150) {
 		mutex_lock(&chip->cool_current);
-		rc = smbchg_fastchg_current_comp_set(chip, 900);
+		rc = smbchg_fastchg_current_comp_set(chip, 1200);
 		mutex_unlock(&chip->cool_current);
 	}
 
@@ -4741,6 +4741,7 @@ static int smbchg_change_usb_supply_type(struct smbchg_chip *chip,
 	 * modes, skip all BC 1.2 current if external typec is supported.
 	 * Note: for SDP supporting current based on USB notifications.
 	 */
+	hvdcp_type = type;
 	if (chip->typec_psy && (type != POWER_SUPPLY_TYPE_USB))
 		current_limit_ma = chip->typec_current_ma;
 	else if (type == POWER_SUPPLY_TYPE_USB)
@@ -4759,6 +4760,7 @@ static int smbchg_change_usb_supply_type(struct smbchg_chip *chip,
 	hvdcp_flag = type;
 	pr_smb(PR_STATUS, "Type %d: setting mA = %d\n",
 		type, current_limit_ma);
+
 	rc = vote(chip->usb_icl_votable, PSY_ICL_VOTER, true,
 				current_limit_ma);
 	if (rc < 0) {
@@ -5931,11 +5933,6 @@ static int smbchg_hvdcp3_confirmed(struct smbchg_chip *chip)
 		pr_err("Couldn't retract HVDCP ICL vote rc=%d\n", rc);
 
 	smbchg_change_usb_supply_type(chip, POWER_SUPPLY_TYPE_USB_HVDCP_3);
-
-	if (chip->parallel.use_parallel_aicl) {
-		complete_all(&chip->hvdcp_det_done);
-		pr_smb(PR_MISC, "hvdcp_det_done complete\n");
-	}
 
 	return rc;
 }
