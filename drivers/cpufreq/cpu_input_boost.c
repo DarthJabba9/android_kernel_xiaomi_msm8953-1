@@ -17,6 +17,7 @@
 #include <linux/cpufreq.h>
 #include <linux/fb.h>
 #include <linux/input.h>
+<<<<<<< HEAD
 #include <linux/moduleparam.h>
 #include <linux/slab.h>
 
@@ -26,28 +27,63 @@ static unsigned short dynamic_stune_boost;
 module_param(dynamic_stune_boost, short, 0644);
 #endif
 
+=======
+#include <linux/slab.h>
+
+>>>>>>> cbebb18081d3... cpu_input_boost: Introduce driver for event-based CPU boosting
 /* Available bits for boost_drv state */
 #define SCREEN_AWAKE		(1U << 0)
 #define INPUT_BOOST		(1U << 1)
 #define WAKE_BOOST		(1U << 2)
+<<<<<<< HEAD
 #define MAX_BOOST		(1U << 3)
+=======
+>>>>>>> cbebb18081d3... cpu_input_boost: Introduce driver for event-based CPU boosting
 
 struct boost_drv {
 	struct workqueue_struct *wq;
 	struct work_struct input_boost;
 	struct delayed_work input_unboost;
+<<<<<<< HEAD
 	struct work_struct max_boost;
 	struct delayed_work max_unboost;
 	struct notifier_block cpu_notif;
 	struct notifier_block fb_notif;
 	unsigned long max_boost_expires;
 	atomic_t max_boost_dur;
+=======
+	struct work_struct wake_boost;
+	struct delayed_work wake_unboost;
+	struct notifier_block cpu_notif;
+	struct notifier_block fb_notif;
+>>>>>>> cbebb18081d3... cpu_input_boost: Introduce driver for event-based CPU boosting
 	spinlock_t lock;
 	u32 state;
 };
 
 static struct boost_drv *boost_drv_g;
 
+<<<<<<< HEAD
+=======
+void cpu_input_boost_kick(void)
+{
+	struct boost_drv *b = boost_drv_g;
+
+	if (!b)
+		return;
+
+	queue_work(b->wq, &b->input_boost);
+}
+
+static u32 get_boost_freq(struct boost_drv *b, u32 cpu)
+{
+	if (cpumask_test_cpu(cpu, cpu_lp_mask))
+		return CONFIG_INPUT_BOOST_FREQ_LP;
+
+	return CONFIG_INPUT_BOOST_FREQ_PERF;
+}
+
+>>>>>>> cbebb18081d3... cpu_input_boost: Introduce driver for event-based CPU boosting
 static u32 get_boost_state(struct boost_drv *b)
 {
 	u32 state;
@@ -87,6 +123,7 @@ static void update_online_cpu_policy(void)
 static void unboost_all_cpus(struct boost_drv *b)
 {
 	if (!cancel_delayed_work_sync(&b->input_unboost) &&
+<<<<<<< HEAD
 		!cancel_delayed_work_sync(&b->max_unboost))
 		return;
 
@@ -133,6 +170,15 @@ void cpu_input_boost_kick_max(unsigned int duration_ms)
 	__cpu_input_boost_kick_max(b, duration_ms);
 }
 
+=======
+		!cancel_delayed_work_sync(&b->wake_unboost))
+		return;
+
+	clear_boost_bit(b, WAKE_BOOST | INPUT_BOOST);
+	update_online_cpu_policy();
+}
+
+>>>>>>> cbebb18081d3... cpu_input_boost: Introduce driver for event-based CPU boosting
 static void input_boost_worker(struct work_struct *work)
 {
 	struct boost_drv *b = container_of(work, typeof(*b), input_boost);
@@ -142,10 +188,13 @@ static void input_boost_worker(struct work_struct *work)
 		update_online_cpu_policy();
 	}
 
+<<<<<<< HEAD
 #ifdef CONFIG_DYNAMIC_STUNE_BOOST
 	if (!do_stune_boost("top-app", dynamic_stune_boost))
 		stune_boost_active = true;
 #endif
+=======
+>>>>>>> cbebb18081d3... cpu_input_boost: Introduce driver for event-based CPU boosting
 	queue_delayed_work(b->wq, &b->input_unboost,
 		msecs_to_jiffies(CONFIG_INPUT_BOOST_DURATION_MS));
 }
@@ -156,6 +205,7 @@ static void input_unboost_worker(struct work_struct *work)
 		container_of(to_delayed_work(work), typeof(*b), input_unboost);
 
 	clear_boost_bit(b, INPUT_BOOST);
+<<<<<<< HEAD
 #ifdef CONFIG_DYNAMIC_STUNE_BOOST
 	if (stune_boost_active) {
 		reset_stune_boost("top-app");
@@ -194,6 +244,30 @@ static void max_unboost_worker(struct work_struct *work)
 		stune_boost_active = false;
 	}
 #endif
+=======
+	update_online_cpu_policy();
+}
+
+static void wake_boost_worker(struct work_struct *work)
+{
+	struct boost_drv *b = container_of(work, typeof(*b), wake_boost);
+
+	if (!cancel_delayed_work_sync(&b->wake_unboost)) {
+		set_boost_bit(b, WAKE_BOOST);
+		update_online_cpu_policy();
+	}
+
+	queue_delayed_work(b->wq, &b->wake_unboost,
+		msecs_to_jiffies(CONFIG_WAKE_BOOST_DURATION_MS));
+}
+
+static void wake_unboost_worker(struct work_struct *work)
+{
+	struct boost_drv *b =
+		container_of(to_delayed_work(work), typeof(*b), wake_unboost);
+
+	clear_boost_bit(b, WAKE_BOOST);
+>>>>>>> cbebb18081d3... cpu_input_boost: Introduce driver for event-based CPU boosting
 	update_online_cpu_policy();
 }
 
@@ -202,15 +276,24 @@ static int cpu_notifier_cb(struct notifier_block *nb,
 {
 	struct boost_drv *b = container_of(nb, typeof(*b), cpu_notif);
 	struct cpufreq_policy *policy = data;
+<<<<<<< HEAD
 	u32 state;
+=======
+	u32 boost_freq, state;
+>>>>>>> cbebb18081d3... cpu_input_boost: Introduce driver for event-based CPU boosting
 
 	if (action != CPUFREQ_ADJUST)
 		return NOTIFY_OK;
 
 	state = get_boost_state(b);
 
+<<<<<<< HEAD
 	/* Boost CPU to max frequency for max boost */
 	if (state & MAX_BOOST) {
+=======
+	/* Boost CPU to max frequency for wake boost */
+	if (state & WAKE_BOOST) {
+>>>>>>> cbebb18081d3... cpu_input_boost: Introduce driver for event-based CPU boosting
 		policy->min = policy->max;
 		return NOTIFY_OK;
 	}
@@ -220,7 +303,12 @@ static int cpu_notifier_cb(struct notifier_block *nb,
 	 * unboosting, set policy->min to the absolute min freq for the CPU.
 	 */
 	if (state & INPUT_BOOST) {
+<<<<<<< HEAD
 		policy->min = min(policy->max, (unsigned int)CONFIG_INPUT_BOOST_FREQ);
+=======
+		boost_freq = get_boost_freq(b, policy->cpu);
+		policy->min = min(policy->max, boost_freq);
+>>>>>>> cbebb18081d3... cpu_input_boost: Introduce driver for event-based CPU boosting
 	} else {
 		policy->min = policy->cpuinfo.min_freq;
 	}
@@ -234,15 +322,28 @@ static int fb_notifier_cb(struct notifier_block *nb,
 	struct boost_drv *b = container_of(nb, typeof(*b), fb_notif);
 	struct fb_event *evdata = data;
 	int *blank = evdata->data;
+<<<<<<< HEAD
+=======
+	u32 state;
+>>>>>>> cbebb18081d3... cpu_input_boost: Introduce driver for event-based CPU boosting
 
 	/* Parse framebuffer blank events as soon as they occur */
 	if (action != FB_EARLY_EVENT_BLANK)
 		return NOTIFY_OK;
 
+<<<<<<< HEAD
 	/* Boost when the screen turns on and unboost when it turns off */
 	if (*blank == FB_BLANK_UNBLANK) {
 		set_boost_bit(b, SCREEN_AWAKE);
 		__cpu_input_boost_kick_max(b, CONFIG_WAKE_BOOST_DURATION_MS);
+=======
+	state = get_boost_state(b);
+
+	/* Boost when the screen turns on and unboost when it turns off */
+	if (*blank == FB_BLANK_UNBLANK) {
+		set_boost_bit(b, SCREEN_AWAKE);
+		queue_work(b->wq, &b->wake_boost);
+>>>>>>> cbebb18081d3... cpu_input_boost: Introduce driver for event-based CPU boosting
 	} else {
 		clear_boost_bit(b, SCREEN_AWAKE);
 		unboost_all_cpus(b);
@@ -298,12 +399,15 @@ free_handle:
 
 static void cpu_input_boost_input_disconnect(struct input_handle *handle)
 {
+<<<<<<< HEAD
 #ifdef CONFIG_DYNAMIC_STUNE_BOOST
 	if (stune_boost_active) {
 		reset_stune_boost("top-app");
 		stune_boost_active = false;
 	}
 #endif
+=======
+>>>>>>> cbebb18081d3... cpu_input_boost: Introduce driver for event-based CPU boosting
 	input_close_device(handle);
 	input_unregister_handle(handle);
 	kfree(handle);
@@ -378,8 +482,13 @@ static int __init cpu_input_boost_init(void)
 	spin_lock_init(&b->lock);
 	INIT_WORK(&b->input_boost, input_boost_worker);
 	INIT_DELAYED_WORK(&b->input_unboost, input_unboost_worker);
+<<<<<<< HEAD
 	INIT_WORK(&b->max_boost, max_boost_worker);
 	INIT_DELAYED_WORK(&b->max_unboost, max_unboost_worker);
+=======
+	INIT_WORK(&b->wake_boost, wake_boost_worker);
+	INIT_DELAYED_WORK(&b->wake_unboost, wake_unboost_worker);
+>>>>>>> cbebb18081d3... cpu_input_boost: Introduce driver for event-based CPU boosting
 	b->state = SCREEN_AWAKE;
 
 	b->cpu_notif.notifier_call = cpu_notifier_cb;
