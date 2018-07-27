@@ -425,18 +425,19 @@ module_param_named(
 	debug_mask, smbchg_debug_mask, int, S_IRUSR | S_IWUSR
 );
 
+/* Enable Parallel Charging */
 static int smbchg_parallel_en = 1;
 module_param_named(
 	parallel_en, smbchg_parallel_en, int, S_IRUSR | S_IWUSR
 );
 
-static int smbchg_main_chg_fcc_percent = 65;
+static int smbchg_main_chg_fcc_percent = 70;
 module_param_named(
 	main_chg_fcc_percent, smbchg_main_chg_fcc_percent,
 	int, S_IRUSR | S_IWUSR
 );
 
-static int smbchg_main_chg_icl_percent = 75;
+static int smbchg_main_chg_icl_percent = 80;
 module_param_named(
 	main_chg_icl_percent, smbchg_main_chg_icl_percent,
 	int, S_IRUSR | S_IWUSR
@@ -448,12 +449,14 @@ module_param_named(
 	int, 0664
 );
 
-static int smbchg_default_hvdcp3_icl_ma = 3000;
+/* Special curent for High Power Buck Mode at 6VDC Supply */
+static int smbchg_default_hvdcp3_icl_ma = 2500;
 module_param_named(
 	default_hvdcp3_icl_ma, smbchg_default_hvdcp3_icl_ma,
 	int, S_IRUSR | S_IWUSR
 );
 
+/* Maximum charging current at 5VDC Supply */
 static int smbchg_default_dcp_icl_ma = 1800;
 module_param_named(
 	default_dcp_icl_ma, smbchg_default_dcp_icl_ma,
@@ -4697,8 +4700,8 @@ static int smbchg_set_optimal_charging_mode(struct smbchg_chip *chip, int type)
 }
 
 #define DEFAULT_SDP_MA		100
-#define DEFAULT_CDP_MA		1500
 enum power_supply_type hvdcp_flag = 0;
+#define DEFAULT_CDP_MA		1800 /* Use a little proper CDP */
 static int smbchg_change_usb_supply_type(struct smbchg_chip *chip,
 						enum power_supply_type type)
 {
