@@ -929,8 +929,6 @@
 
 		/* RCGwR settings */
 		/* why they didn't put this in first place? */
-		qcom,num-clusters =
-		<2>;
 		qcom,lmh-sid-c0  =
 		< 48 125241051>,
 		< 52 89457225>,
@@ -1031,7 +1029,7 @@
 				"cpu15_clk", "cpu16_clk", "cpu17_clk", "cpu18_clk",
 				"cpu19_clk", "cpu20_clk", "cpu21_clk", "cpu22_clk",
 				"cpu23_clk", "cpu24_clk";
->		clocks = <&clock_cpu clk_cci_clk>,
+		clocks = <&clock_cpu clk_cci_clk>,
 			 <&clock_cpu clk_a53_pwr_clk>,
 			 <&clock_cpu clk_a53_pwr_clk>,
 			 <&clock_cpu clk_a53_pwr_clk>,
