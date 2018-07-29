@@ -105,11 +105,8 @@ echo -e "[4] DragonTC 7.0"
 echo -ne "\n$brown(i) Select Custom Toolchain[1-4]:$nc "
 read customTC
 if [[ "$customTC" == "1" ]]; then
-  cd toolchains/Toolchains
-  git checkout opt-gnu-8.x &>/dev/null 
-  cd - &>/dev/null
   echo -e "\n$blue building with custom GCC 8.x..."
-  export CROSS_COMPILE="$PWD/toolchains/Toolchains/bin/aarch64-opt-linux-android-"
+  export CROSS_COMPILE="/home/ramakun/git/kernel_xiaomi_vince/toolchains/aarch64-linux-android/bin/aarch64-opt-linux-android-"
   make  O=out $CONFIG $THREAD &>/dev/null
   make  O=out $THREAD &>Buildlog.txt & pid=$!   
 fi
