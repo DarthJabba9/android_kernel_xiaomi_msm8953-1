@@ -5,11 +5,8 @@
  *
  * Copyright (C) 2012 Alexandra Chin <alexandra.chin@tw.synaptics.com>
  * Copyright (C) 2012 Scott Lin <scott.lin@tw.synaptics.com>
-<<<<<<< HEAD
-=======
  * Copyright (C) 2018 XiaoMi, Inc.
->>>>>>> 1ac9cd7dd9b9... vince: back to drivers stock touchscreen
- *
+*
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -685,19 +682,16 @@ static enum flash_area fwu_go_nogo(struct image_header_data *header)
 			goto exit;
 		}
 
-<<<<<<< HEAD
+		while (strptr[index] >= '0' && strptr[index] <= '9') {
+			firmware_id[index] = strptr[index];
+			index++;
+		}
 		while ((index < MAX_FIRMWARE_ID_LEN - 1) && strptr[index] >= '0'
 						&& strptr[index] <= '9') {
 			firmware_id[index] = strptr[index];
 			index++;
 		}
 		firmware_id[index] = '\0';
-=======
-		while (strptr[index] >= '0' && strptr[index] <= '9') {
-			firmware_id[index] = strptr[index];
-			index++;
-		}
->>>>>>> 1ac9cd7dd9b9... vince: back to drivers stock touchscreen
 
 		retval = sstrtoul(firmware_id, 10, &image_fw_id);
 		kfree(firmware_id);
