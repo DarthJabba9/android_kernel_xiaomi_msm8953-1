@@ -18,8 +18,8 @@
 	rpm-regulator-smpa1 {
 		status = "okay";
 		pm8953_s1: regulator-s1 {
-			regulator-min-microvolt = <795000>; // UV by -75mV
-			regulator-max-microvolt = <1081000>;
+			regulator-min-microvolt = <870000>; 
+			regulator-max-microvolt = <1156000>;
 			qcom,init-voltage = <1000000>;
 			status = "okay";
 		};
@@ -137,7 +137,7 @@
 		status = "okay";
 		pm8953_l1: regulator-l1 {
 			regulator-min-microvolt = <1000000>;
-			regulator-max-microvolt = <1000000>;
+			regulator-max-microvolt = <1100000>;
 			qcom,init-voltage = <1000000>;
 			status = "okay";
 		};
@@ -146,9 +146,9 @@
 	rpm-regulator-ldoa2 {
 		status = "okay";
 		pm8953_l2: regulator-l2 {
-			regulator-min-microvolt = <1200000>;
+			regulator-min-microvolt = <975000>;
 			regulator-max-microvolt = <1225000>;
-			qcom,init-voltage = <1200000>;
+			qcom,init-voltage = <975000>;
 			status = "okay";
 		};
 	};
@@ -275,9 +275,9 @@
 	rpm-regulator-ldoa17 {
 		status = "okay";
 		pm8953_l17: regulator-l17 {
-			regulator-min-microvolt = <2750000>;
+			regulator-min-microvolt = <2850000>;
 			regulator-max-microvolt = <2850000>;
-			qcom,init-voltage = <2800000>;
+			qcom,init-voltage = <2850000>;
 			status = "okay";
 		};
 	};
@@ -296,7 +296,7 @@
 		status = "okay";
 		pm8953_l22: regulator-l22 {
 			regulator-min-microvolt = <2800000>;
-			regulator-max-microvolt = <2800000>;
+			regulator-max-microvolt = <2850000>;
 			qcom,init-voltage = <2800000>;
 			status = "okay";
 		};
@@ -305,9 +305,9 @@
 	rpm-regulator-ldoa23 {
 		status = "okay";
 		pm8953_l23: regulator-l23 {
-			regulator-min-microvolt = <1200000>;
+			regulator-min-microvolt = <975000>;
 			regulator-max-microvolt = <1225000>;
-			qcom,init-voltage = <120000>;
+			qcom,init-voltage = <975000>;
 			status = "okay";
 		};
 	};
@@ -321,13 +321,13 @@
 			reg = <0x2000 0x100>;
 			qcom,init-quiet-mode = <2>; //Regulator EMI noise reduction
 			regulator-name = "pm8953_s5";
-			regulator-min-microvolt = <400000>;
+			regulator-min-microvolt = <490000>;
 			regulator-max-microvolt = <1140000>;
 
 			pm8953_s5_limit: avs-limit-regulator {
 				regulator-name = "pm8953_s5_avs_limit";
-				regulator-min-microvolt = <400000>;
-				regulator-max-microvolt = <1140000>;
+				regulator-min-microvolt = <490000>;
+				regulator-max-microvolt = <1015000>;
 			};
 		};
 	};
@@ -403,7 +403,7 @@
 			apc_vreg: regulator {
 				regulator-name = "apc_corner";
 				regulator-min-microvolt = <1>;
-				regulator-max-microvolt = <24>; // Make sure this same as max freq tuple
+				regulator-max-microvolt = <14>; /* Make sure this same as max freq tuple */
 
 				qcom,cpr-fuse-corners = <4>;
 				qcom,cpr-fuse-combos = <64>;
@@ -411,135 +411,76 @@
 				qcom,cpr-speed-bin-corners =
 				/* Global speed bin */
 				/* NOTE : Align this two same values like our max freq tuple */
-				<24 24 24 24 24 24 24 24>;
+				<14 14 14 14 14 14 14 14>;
 				qcom,cpr-corners =
 				/* Global speed bin */
-				<24 24 24 24 24 24 24 24>;
+				<14 14 14 14 14 14 14 14>;
 				qcom,cpr-corner-fmax-map =
 				/* Global speed bin */
 				/* NOTE : Change the last value according to max freq tuple */
-				<1 2 4 24>;
+				<1 2 4 14>;
 
 				qcom,cpr-voltage-ceiling =
 				/* Global speed bin */
-				<625000>,
-				<640000>,
-				<655000>,
-				<670000>,
-				<675000>,
-				<690000>,
+				<680000>,
 				<695000>,
-				<715000>,
-				<725000>,
-				<735000>,
-				<745000>,
-				<755000>,
-				<760000>,
-				<765000>,
-				<795000>,
-				<820000>,
+				<710000>,
+				<800000>,
+				<815000>,
 				<890000>,
-				<955000>,
-				<960000>,
-				<965000>,
-				<990000>,
-				<995000>,
-				<1000000>,
-				<1015000>;
+				<905000>,
+				<920000>,
+				<935000>,
+				<950000>,
+				<985000>,
+				<1040000>,
+				<1050000>,
+				<1055000>;
 
 				qcom,cpr-voltage-floor =
 				/* Global speed bin */
-				<615000>,
-				<630000>,
-				<645000>,
-				<660000>,
-				<665000>,
-				<680000>,
-				<685000>,
-				<705000>,
-				<715000>,
-				<725000>,
-				<735000>,
-				<745000>,
-				<750000>,
-				<755000>,
-				<785000>,
-				<810000>,
-				<880000>,
-				<945000>,
-				<950000>,
-				<955000>,
-				<980000>,
-				<985000>,
-				<990000>,
-				<1005000>;
+				<625000>,
+				<625000>,
+				<625000>,
+				<625000>,
+				<625000>,
+				<625000>,
+				<625000>,
+				<625000>,
+				<625000>,
+				<625000>,
+				<625000>,
+				<625000>,
+				<625000>,
+				<625000>;
 
 				qcom,cpr-floor-to-ceiling-max-range =
 				/* Global speed bin; CPR rev 0..7 */
 				/* NOTE : CPR Floor ceiling alignment is up to down and the first one is left to right */
-				<0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0>,
-				<50000 50000 50000 50000 50000 50000 50000>,
-				<50000 50000 50000 50000 50000 50000 50000>,
-				<50000 50000 50000 50000 50000 50000 50000>,
-				<50000 50000 50000 50000 50000 50000 50000>,
-				<50000 50000 50000 50000 50000 50000 50000>,
-				<50000 50000 50000 50000 50000 50000 50000>,
-				<50000 50000 50000 50000 50000 50000 50000>,
-				<50000 50000 50000 50000 50000 50000 50000>,
-				<50000 50000 50000 50000 50000 50000 50000>,
-				<50000 50000 50000 50000 50000 50000 50000>,
-				<50000 50000 50000 50000 50000 50000 50000>,
-				<50000 50000 50000 50000 50000 50000 50000>,
-				<50000 50000 50000 50000 50000 50000 50000>,
-				<50000 50000 50000 50000 50000 50000 50000>,
-				<50000 50000 50000 50000 50000 50000 50000>,
-				<50000 50000 50000 50000 50000 50000 50000>,
-				<50000 50000 50000 50000 50000 50000 50000>,
-				<50000 50000 50000 50000 50000 50000 50000>,
-				<50000 50000 50000 50000 50000 50000 50000>,
-				<50000 50000 50000 50000 50000 50000 50000>,
-				<50000 50000 50000 50000 50000 50000 50000>,
-				<50000 50000 50000 50000 50000 50000 50000>,
-				<50000 50000 50000 50000 50000 50000 50000>,
-				<50000 50000 50000 50000 50000 50000 50000>;
-
-				qcom,cpr-misc-fuse-voltage-adjustment =
-				/* Global speed bin */
-				/* FIXME: Pls help me counting to 12, I've derped here multiple times */
-				<0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0>,
-				<0 0 30000 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0>;
+				<50000 50000 50000 50000 50000 50000 50000
+				 50000 80000 80000 80000 80000 80000 80000>;
 
 				qcom,mem-acc-voltage =
 				/* Global speed bin */
-				<1 1 1 1 1 1 1 1 1 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2>;
+				<1 1 1 1 1 1 1 1 1 2 2 2 2 2>;
 				 /*default is 4 "1"*/
 
 				qcom,corner-frequencies =
 				/* Global speed bin */
-				<400457>,
-				<480000>,
-				<576000>,
-				<652800>,
-				<729600>,
-				<806400>,
-				<883200>,
-				<960000>,
-				<1036800>,
-				<1113600>,
-				<1248000>,
-				<1305600>,
-				<1401600>,
-				<1536000>,
-				<1689600>,
-				<1758400>,
-				<1804800>,
-				<1843200>,
-				<1958400>,
-				<2016000>,
-				<2150400>,
-				<2208000>,
-				<2304000>,
-				<2400000>;
+				<  307200 >,
+				<  403200 >,
+				<  556800 >,
+				<  652800 >,
+				< 1036800 >,
+				< 1401600 >,
+				< 1689600 >,
+				< 1843200 >,
+				< 1958400 >,
+				< 2016000 >,
+				< 2150400 >,
+				< 2208000 >,
+				< 2304000 >,
+				< 2400000 >;
 
 				qcom,cpr-open-loop-voltage-fuse-adjustment =
 				/* Speed bin 0; CPR rev 0..7 */
@@ -578,14 +519,14 @@
 				qcom,corner-allow-temp-adjustment =
 				/* Global speed bin; CPR rev 0..7 */
 				/* NOTE : Temp adjustment alignment is left to right */
-				<0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0>,
-				<0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0>,
-				<0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0>,
-				<1 1 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0>,
-				<1 1 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0>,
-				<1 1 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0>,
-				<1 1 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0>,
-				<1 1 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0>;
+				<0 0 0 0 0 0 0 0 0 0 0 0 0 0>,
+				<0 0 0 0 0 0 0 0 0 0 0 0 0 0>,
+				<0 0 0 0 0 0 0 0 0 0 0 0 0 0>,
+				<1 1 1 1 1 0 0 0 0 0 0 0 0 0>,
+				<1 1 1 1 1 0 0 0 0 0 0 0 0 0>,
+				<1 1 1 1 1 0 0 0 0 0 0 0 0 0>,
+				<1 1 1 1 1 0 0 0 0 0 0 0 0 0>,
+				<1 1 1 1 1 0 0 0 0 0 0 0 0 0>;
 
 				qcom,cpr-corner1-temp-core-voltage-adjustment =
 				<(0) (-5000) (-15000) (-20000)>;
@@ -629,23 +570,23 @@
 
 		regulator-name = "msm_gfx_ldo";
 		regulator-min-microvolt = <1>;
-		regulator-max-microvolt = <10>;
+		regulator-max-microvolt = <7>;
 
 		/* Wednesday */
 		qcom,ldo-voltage-ceiling =
-		<615000>,
-		<675000>,
-		<720000>;
+		<620000>,
+		<680000>,
+		<750000>;
 		qcom,ldo-voltage-floor =
-		<485000>,
-		<485000>,
-		<575000>;
+		<510000>,
+		<510000>,
+		<600000>;
 
-		qcom,num-corners = <10>;
+		qcom,num-corners = <7>;
 		qcom,num-ldo-corners = <3>;
 		qcom,ldo-enable-corner-map =
 		/* NOTE : Same as CPU, Right to left */
-		<1 1 1 1 1 0 0 0 0 0>;
+		<1 1 1 0 0 0 0>;
 		qcom,init-corner = <4>;
 
 		/* FIXME : This part can't be parsed, why this exists? */

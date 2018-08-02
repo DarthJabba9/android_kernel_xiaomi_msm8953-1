@@ -1000,10 +1000,17 @@
 
 	msm_cpufreq: qcom,msm-cpufreq {
 		compatible = "qcom,msm-cpufreq";
-		clock-names = "l2_clk", "cpu0_clk", "cpu1_clk", "cpu2_clk",
-				"cpu3_clk", "cpu4_clk", "cpu5_clk",
-				"cpu6_clk", "cpu7_clk";
+		clock-names = 
+				"l2_clk", "cpu0_clk", "cpu1_clk", "cpu2_clk",
+				"cpu3_clk", "cpu4_clk", "cpu5_clk", "cpu6_clk", 
+				"cpu7_clk", "cpu8_clk", "cpu9_clk", "cpu10_clk", 
+				"cpu11_clk", "cpu12_clk", "cpu13_clk", "cpu14_clk";
 		clocks = <&clock_cpu clk_cci_clk>,
+			 <&clock_cpu clk_a53_pwr_clk>,
+			 <&clock_cpu clk_a53_pwr_clk>,
+			 <&clock_cpu clk_a53_pwr_clk>,
+			 <&clock_cpu clk_a53_pwr_clk>,
+			 <&clock_cpu clk_a53_pwr_clk>,
 			 <&clock_cpu clk_a53_pwr_clk>,
 			 <&clock_cpu clk_a53_pwr_clk>,
 			 <&clock_cpu clk_a53_pwr_clk>,
@@ -1014,15 +1021,21 @@
 			 <&clock_cpu clk_a53_pwr_clk>;
 
 		qcom,cpufreq-table =
-			 <  652800 >,
-			 < 1036800 >,
-			 < 1401600 >,
-			 < 1689600 >,
-			 < 1804800 >,
-			 < 1958400 >,
-			 < 2016000 >,
-			 < 2150400 >,
-			 < 2208000 >;
+			/* TODO: More Ducktales */
+			<  307200 >,
+			<  403200 >,
+			<  556800 >,
+			<  652800 >,
+			< 1036800 >,
+			< 1401600 >,
+			< 1689600 >,
+			< 1843200 >,
+			< 1958400 >,
+			< 2016000 >,
+			< 2150400 >,
+			< 2208000 >,
+			< 2304000 >,
+			< 2400000 >;
 	};
 
 	cpubw: qcom,cpubw {
@@ -1075,22 +1088,26 @@
 	devfreq-cpufreq {
 		cpubw-cpufreq {
 		target-dev = <&cpubw>;
-		cpu-to-dev-map =
-			 <  652800  1611>,
-			 < 1036800  3221>,
-			 < 1401600  5859>,
-			 < 1689600  6445>,
-			 < 1804800  7104>,
-			 < 1958400  7104>,
-			 < 2208000  7104>;
+		cpu-to-dev-map = 
+					<  307200  1525 >,
+					<  403200  1525 >,
+					<  480000  1525 >,
+					<  556800  2288 >,
+					<  652800  2288 >,
+					< 1036800  4066 >,
+					< 1401600  5126 >,
+					< 1689600  5928 >,
+					< 1843200  7904 >,
+					< 1958400  9887 >,
+					< 2208000  11863>,
+					< 2400000  13763>;
 		};
 
 		mincpubw-cpufreq {
 			target-dev = <&mincpubw>;
-			cpu-to-dev-map =
-				<  652800 1611 >,
-				< 1401600 3221 >,
-				< 2208000 5859 >;
+			cpu-to-dev-map = 
+					 <2208000 1525>,
+					 <2400000 5126>;
 		};
 	};
 
