@@ -28,7 +28,8 @@ nc='\033[0m'
 
 #Directories
 KERNEL_DIR=$PWD
-KERN_IMG=$KERNEL_DIR/out/arch/arm64/boot/Image.gz-dtb
+KERN_IMG=$KERNEL_DIR/out/arch/arm64/boot/Image.gz
+DTB=$KERNEL_DIR/out/arch/arm64/boot/dts/qcom/msm8953-qrd-sku3-e7.dtb
 ZIP_DIR=$KERNEL_DIR/Zipper
 CONFIG_DIR=$KERNEL_DIR/arch/arm64/configs
 
@@ -40,8 +41,9 @@ export CLANG_TRIPLE=aarch64-linux-gnu-
 #Exports
 export ARCH=arm64
 export SUBARCH=arm64
+export PATH=/usr/lib/ccache:$PATH
 export KBUILD_BUILD_USER="Ramakun"
-export KBUILD_BUILD_HOST="NettaHolic2-VM"
+export KBUILD_BUILD_HOST="Warnet-Nettaholic-2"
 
 #Misc
 CONFIG=vince_defconfig
@@ -71,7 +73,7 @@ echo -ne "\n$brown(i) Please enter a choice[1-6]:$nc "
 read choice
 
 if [ "$choice" == "1" ]; then
-
+  
 echo -e "\n$green[1] Stock GCC"
 echo -e "[2] Stock Clang"
 echo -e "[3] Custom Toolchain"
@@ -80,7 +82,7 @@ read TC
 
   if [[ "$TC" == "1" ]]; then
   echo -e "\n$blue building with stock GCC..."
-  export CROSS_COMPILE="/home/ramakun/git/kernel_xiaomi_vince/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64/bin/aarch64-linux-android-"
+  export CROSS_COMPILE="$PWD/toolchains/linux-x86/aarch64/aarch64-linux-android-4.9/bin/aarch64-linux-android-"
   make  O=out $CONFIG $THREAD &>/dev/null
   make  O=out $THREAD &>Buildlog.txt & pid=$!   
   fi
@@ -105,8 +107,11 @@ echo -e "[4] DragonTC 7.0"
 echo -ne "\n$brown(i) Select Custom Toolchain[1-4]:$nc "
 read customTC
 if [[ "$customTC" == "1" ]]; then
+  cd toolchains/Toolchains
+  git checkout opt-gnu-8.x &>/dev/null 
+  cd - &>/dev/null
   echo -e "\n$blue building with custom GCC 8.x..."
-  export CROSS_COMPILE="/home/ramakun/git/kernel_xiaomi_vince/toolchains/aarch64-linux-android/bin/aarch64-opt-linux-android-"
+  export CROSS_COMPILE="$PWD/toolchains/Toolchains/bin/aarch64-opt-linux-android-"
   make  O=out $CONFIG $THREAD &>/dev/null
   make  O=out $THREAD &>Buildlog.txt & pid=$!   
 fi
@@ -165,6 +170,7 @@ echo -e "$brown(i) Build started at $DATE$nc"
   if ! [ -a $KERN_IMG ]; then
     echo -e "\n$red(!) Kernel compilation failed, See buildlog to fix errors $nc"
     echo -e "$red#######################################################################$nc"
+    git checkout darky &>/dev/null  
     exit 1
   fi
   $DTBTOOL -2 -o $KERNEL_DIR/arch/arm/boot/dt.img -s 2048 -p $KERNEL_DIR/scripts/dtc/ $KERNEL_DIR/arch/arm/boot/dts/ &>/dev/null &>/dev/null
@@ -175,6 +181,7 @@ echo -e "$brown(i) Build started at $DATE$nc"
   echo -e "$cyan#######################################################################$nc"
   echo -e "$purple(i) Total time elapsed: $(($DIFF / 60)) minute(s) and $(($DIFF % 60)) seconds.$nc"
   echo -e "$cyan#######################################################################$nc"
+  git checkout darky &>/dev/null  
 fi
 
 if [ "$choice" == "2" ]; then
@@ -200,19 +207,9 @@ if [ "$choice" == "4" ]; then
   echo -e "\n$cyan#######################################################################$nc"
   cd $ZIP_DIR
   make clean &>/dev/null
-  cp $KERN_IMG $ZIP_DIR/boot/zImage
-  if [[ "$type" == "1" && "$TC" == "1" ||  "$customTC" == "1" || "$customTC" == "2" || "$customTC" == "3" ]]; then
-    make normal &>/dev/null
-  fi
-  if [[ "$type" == "1" && "$TC" == "2" || "$customTC" == "4" ]]; then
-    make nclang &>/dev/null
-  fi
-   if [[ "$type" == "2" && "$TC" == "1" ||  "$customTC" == "1" || "$customTC" == "2" || "$customTC" == "3" ]]; then
-    make treble &>/dev/null
-  fi
-   if [[ "$type" == "2" && "$TC" == "2" || "$customTC" == "4" ]]; then
-    make tclang &>/dev/null
-  fi
+  cp $KERN_IMG $ZIP_DIR/kernel/Image.gz
+  cp $DTB $ZIP_DIR/kernel/normal/msm8953-qrd-sku3-e7.dtb
+     make normal &>/dev/null
   cd ..
   echo -e "$purple(i) Flashable zip generated under $ZIP_DIR.$nc"
   echo -e "$cyan#######################################################################$nc"
@@ -222,7 +219,7 @@ fi
 if [[ "$choice" == "5" ]]; then
   echo -e "\n$cyan#######################################################################$nc"
   cd $ZIP_DIR
-  gdrive upload Dark-Ages*.zip &>/dev/null
+  gdrive upload Genom*.zip &>/dev/null
   cd ..
   echo -e "$purple(i) Zip uploaded Sucessfully!"
   echo -e "$cyan#######################################################################$nc" 
@@ -232,4 +229,3 @@ if [ "$choice" == "6" ]; then
  exit 1
 fi
 done
-

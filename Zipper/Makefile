@@ -1,32 +1,20 @@
-NAME ?= Dark-Ages
+NAME ?= Genom
 
 
-DATE := $(shell date "+%d%m%Y-%I%M")
+DATE := $(shell date "+%Y%m%d-%I%M")
 
-CODE := Segundo
+CODE := Anone
 
 ZIP := $(NAME)-$(CODE)-$(DATE).zip
 CZIP := $(NAME)-$(CODE)-Clang-$(DATE).zip
-TZIP := $(NAME)-$(CODE)-Treble-$(DATE).zip
-CTZIP := $(NAME)-$(CODE)-Treble-Clang-$(DATE).zip
 
-EXCLUDE := Makefile *.git* *.jar* Dark-Ages*
+EXCLUDE := Makefile *.git* *.jar* Dark-Ages* *placeholder*
 
 normal: $(ZIP)
 nclang: $(CZIP)
-treble: $(TZIP)
-tclang: $(CTZIP)
 
 $(ZIP):
 	@echo "Creating ZIP: $(ZIP)"
-	@zip -r9 "$@" . -x $(EXCLUDE)
-	@echo "Generating SHA1..."
-	@sha1sum "$@" > "$@.sha1"
-	@cat "$@.sha1"
-	@echo "Done."
-
-$(TZIP):
-	@echo "Creating ZIP: $(TZIP)"
 	@zip -r9 "$@" . -x $(EXCLUDE)
 	@echo "Generating SHA1..."
 	@sha1sum "$@" > "$@.sha1"
@@ -41,17 +29,11 @@ $(CZIP):
 	@cat "$@.sha1"
 	@echo "Done."
 
-$(CTZIP):
-	@echo "Creating ZIP: $(CTZIP)"
-	@zip -r9 "$@" . -x $(EXCLUDE)
-	@echo "Generating SHA1..."
-	@sha1sum "$@" > "$@.sha1"
-	@cat "$@.sha1"
-	@echo "Done."
 
 clean:
 	@rm -vf "$(NAME)-"*.zip*
-	@rm -vf boot/zImage
+	@rm -vf kernel/Image.gz
+	@rm -vf kernel/normal/msm8953-qrd-sku3-e7.dtb
 	@echo "Done."
 
 
