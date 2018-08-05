@@ -2392,5 +2392,4 @@ bool hdd_is_memdump_supported(void);
  *         else return false
  */
 bool hdd_is_cli_iface_up(hdd_context_t *hdd_ctx);
-
 #endif    // end #if !defined( WLAN_HDD_MAIN_H )
