@@ -54,9 +54,6 @@ struct vdso_data *vdso_data = &vdso_data_store.data;
 /*
  * Create and map the vectors page for AArch32 tasks.
  */
-<<<<<<< HEAD
-static struct page *vectors_page[1];
-=======
 static struct page *vectors_page[] __ro_after_init;
 static const struct vm_special_mapping compat_vdso_spec[] = {
 	{
@@ -72,7 +69,6 @@ static const struct vm_special_mapping compat_vdso_spec[] = {
 #endif
 };
 static struct page *vectors_page[ARRAY_SIZE(compat_vdso_spec)] __ro_after_init;
->>>>>>> 3909e4eb9088... FROMLIST: BACKPORT: [PATCH v2 1/3] arm64: compat: Split the sigreturn trampolines and kuser helpers (C sources)
 
 static int __init alloc_vectors_page(void)
 {
