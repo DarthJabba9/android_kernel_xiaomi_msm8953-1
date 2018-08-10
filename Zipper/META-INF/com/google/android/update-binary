@@ -107,7 +107,13 @@ if [ "$(file_getprop /tmp/anykernel/anykernel.sh do.devicecheck)" == 1 ]; then
   if [ "$(file_getprop /system/build.prop ro.build.version.sdk)" != "27" || "$(file_getprop /system/build.prop ro.build.version.sdk)" != "28" ]; then
     abort " ! Unsupported Android version. Aborting...";
   fi;
+  if [ "$(file_getprop /system/build.prop ro.treble.enabled)" == "true" ]; then
+    dtb=/tmp/anykernel/kernel/treble;
+    ui_print " - Checked -> Treble.";
+  else
     dtb=/tmp/anykernel/kernel/normal;
+    ui_print " - Checked -> Normal.";
+  fi;
 fi;
 
 if [ -f /system/system/build.prop ]; then

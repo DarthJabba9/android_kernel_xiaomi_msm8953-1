@@ -4,7 +4,7 @@
 ## AnyKernel setup
 # begin properties
 properties() { '
-kernel.string=Genom Kernel for Oreo Non-Treble ROMs
+kernel.string=Genom Kernel r5 by rama982 @ telegram
 do.devicecheck=1
 do.modules=0
 do.cleanup=1

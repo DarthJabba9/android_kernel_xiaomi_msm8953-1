@@ -3,7 +3,7 @@ NAME ?= Genom
 
 DATE := $(shell date "+%Y%m%d-%I%M")
 
-CODE := Anone
+CODE := Anone-KOMBO
 
 ZIP := $(NAME)-$(CODE)-$(DATE).zip
 CZIP := $(NAME)-$(CODE)-Clang-$(DATE).zip
@@ -33,7 +33,8 @@ $(CZIP):
 clean:
 	@rm -vf "$(NAME)-"*.zip*
 	@rm -vf kernel/Image.gz
-	@rm -vf kernel/normal/msm8953-qrd-sku3-e7.dtb
+	@rm -vf kernel/treble/msm8953-qrd-sku3-e7.dtb
+	@rm -vf kernel/normal/msm8953-qrd-sku3-e7-nt.dtb
 	@echo "Done."
 
 

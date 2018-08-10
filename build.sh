@@ -30,6 +30,7 @@ nc='\033[0m'
 KERNEL_DIR=$PWD
 KERN_IMG=$KERNEL_DIR/out/arch/arm64/boot/Image.gz
 DTB=$KERNEL_DIR/out/arch/arm64/boot/dts/qcom/msm8953-qrd-sku3-e7.dtb
+DTB_T=$KERNEL_DIR/out/arch/arm64/boot/dts/qcom/msm8953-qrd-sku3-e7-nt.dtb
 ZIP_DIR=$KERNEL_DIR/Zipper
 CONFIG_DIR=$KERNEL_DIR/arch/arm64/configs
 
@@ -208,7 +209,8 @@ if [ "$choice" == "4" ]; then
   cd $ZIP_DIR
   make clean &>/dev/null
   cp $KERN_IMG $ZIP_DIR/kernel/Image.gz
-  cp $DTB $ZIP_DIR/kernel/normal/msm8953-qrd-sku3-e7.dtb
+  cp $DTB $ZIP_DIR/kernel/treble/msm8953-qrd-sku3-e7.dtb
+  cp $DTB_T $ZIP_DIR/kernel/normal/msm8953-qrd-sku3-e7-nt.dtb
      make normal &>/dev/null
   cd ..
   echo -e "$purple(i) Flashable zip generated under $ZIP_DIR.$nc"
