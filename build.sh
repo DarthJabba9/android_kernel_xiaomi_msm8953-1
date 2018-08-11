@@ -82,10 +82,10 @@ echo -ne "\n$brown(i) Select Toolchain[1-4]:$nc "
 read TC
 
   if [[ "$TC" == "1" ]]; then
-  echo -e "\n$blue building with stock GCC..."
-  export CROSS_COMPILE="$PWD/toolchains/linux-x86/aarch64/aarch64-linux-android-4.9/bin/aarch64-linux-android-"
+  echo -e "\n$green building with stock GCC..."
+  export CROSS_COMPILE="$PWD/toolchains/stock/bin/aarch64-linux-android-"
   make  O=out $CONFIG $THREAD &>/dev/null
-  make  O=out $THREAD &>Buildlog.txt & pid=$!   
+  make  O=out $THREAD & pid=$!   
   fi
 
 if [[ "$TC" == "2" ]]; then

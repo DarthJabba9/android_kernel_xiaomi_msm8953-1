@@ -10,19 +10,6 @@ on late-fs
 on property:sys.boot_completed=1
     setprop sys.use_fifo_ui 1
 
-    # Set permissions
-    chown system system /sys/devices/platform/kcal_ctrl.0/kcal*
-    chown system system /sys/class/devfreq/1c00000.qcom,kgsl-3d0/governor
-    chown system system /sys/class/devfreq/1c00000.qcom,kgsl-3d0/max_freq
-    chown system system /sys/class/devfreq/1c00000.qcom,kgsl-3d0/min_freq
-    chown system system /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
-    chown system system /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
-    chown system system /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
-
-    # ZRAM 
-    write /sys/block/zram0/reset 1
-    write /sys/block/zram0/disksize 1610612736
-
 # Make sure Qualcomm init doesn't break this one and in case that our set
 # ignored in first boot coz of sepolicy inject nonexistence, use pwrutilx
 on property:init.svc.qcom-post-boot=stopped
