@@ -26,7 +26,7 @@ is_slot_device=0;
 ## AnyKernel file attributes
 # set permissions/ownership for included ramdisk files
 chmod -R 750 $ramdisk/*;
-chmod -R 755 $ramdisk/sbin;
+find $ramdisk -type f -exec chmod 644 {} \;
 chown -R root:root $ramdisk/*;
 
 
@@ -38,6 +38,22 @@ dump_boot;
 # inject init
 insert_line init.rc "import /init.ramakun.rc" after "import /init.usb.configfs.rc" "import /init.ramakun.rc";
 insert_line init.rc "import /init.spectrum.rc" after "import /init.ramakun.rc" "import /init.spectrum.rc";
+
+# sepolicy
+$bin/magiskpolicy --load sepolicy --save sepolicy \
+    "allow init rootfs file execute_no_trans" \
+    "allow { init modprobe } rootfs system module_load" \
+    "allow init { system_file vendor_file vendor_configs_file } file mounton" \
+    "allow { msm_irqbalanced hal_perf_default } rootfs file { getattr read open } " \
+    ;
+
+# sepolicy_debug
+$bin/magiskpolicy --load sepolicy_debug --save sepolicy_debug \
+    "allow init rootfs file execute_no_trans" \
+    "allow { init modprobe } rootfs system module_load" \
+    "allow init { system_file vendor_file vendor_configs_file } file mounton" \
+    "allow { msm_irqbalanced hal_perf_default } rootfs file { getattr read open } " \
+    ;
 
 # end ramdisk changes
 
