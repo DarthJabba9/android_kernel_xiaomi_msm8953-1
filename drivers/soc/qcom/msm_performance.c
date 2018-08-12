@@ -28,7 +28,6 @@
 
 static int touchboost = 1;
 
-#ifndef CONFIG_MSM_PERFORMANCE_CPUFREQ_LIMITS_VOTING_ONLY
 static unsigned int use_input_evts_with_hi_slvt_detect;
 static struct mutex managed_cpus_lock;
 
@@ -367,7 +366,6 @@ static const struct kernel_param_ops param_ops_managed_online_cpus = {
 device_param_cb(managed_online_cpus, &param_ops_managed_online_cpus,
 							NULL, 0444);
 #endif
-#endif // CONFIG_MSM_PERFORMANCE_CPUFREQ_LIMITS_VOTING_ONLY
 
 static int set_touchboost(const char *buf, const struct kernel_param *kp)
 {
