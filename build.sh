@@ -186,7 +186,7 @@ fi
 if [ "$choice" == "2" ]; then
   echo -e "\n$cyan#######################################################################$nc"
   make O=out  $CONFIG
-  cp .config arch/arm64/configs/$CONFIG
+  cp out/.config arch/arm64/configs/$CONFIG
   echo -e "$purple(i) Defconfig generated.$nc"
   echo -e "$cyan#######################################################################$nc"
 fi
