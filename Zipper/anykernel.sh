@@ -26,7 +26,6 @@ is_slot_device=0;
 ## AnyKernel file attributes
 # set permissions/ownership for included ramdisk files
 chmod -R 750 $ramdisk/*;
-find $ramdisk -type f -exec chmod 644 {} \;
 chown -R root:root $ramdisk/*;
 
 
