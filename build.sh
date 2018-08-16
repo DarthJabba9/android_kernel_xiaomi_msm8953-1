@@ -21,7 +21,7 @@ black='\033[0;30m'
 red='\033[0;31m'
 green='\033[0;32m'
 brown='\033[0;33m'
-blue='\033[0;34m'
+blue='\033[0;32m'
 purple='\033[1;35m'
 cyan='\033[0;36m'
 nc='\033[0m'
@@ -47,7 +47,7 @@ export KBUILD_BUILD_USER="Ramakun"
 export KBUILD_BUILD_HOST="Warnet-Nettaholic-2"
 
 #Misc
-CONFIG=vince_defconfig
+CONFIG=genom_defconfig
 THREAD="-j2"
 
 # Here We Go
@@ -83,7 +83,9 @@ read TC
 
   if [[ "$TC" == "1" ]]; then
   echo -e "\n$green building with stock GCC..."
-  export CROSS_COMPILE="$PWD/toolchains/stock/bin/aarch64-linux-android-"
+  CROSS_COMPILE+="ccache "
+  CROSS_COMPILE+="$PWD/toolchains/stock/bin/aarch64-linux-android-"
+  export CROSS_COMPILE
   make  O=out $CONFIG $THREAD &>/dev/null
   make  O=out $THREAD & pid=$!   
   fi
