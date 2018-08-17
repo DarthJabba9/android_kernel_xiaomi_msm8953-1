@@ -3,7 +3,7 @@ NAME ?= Genom
 
 DATE := $(shell date "+%Y%m%d-%I%M")
 
-CODE := Anone-KOMBO
+CODE := OC-kombo
 
 ZIP := $(NAME)-$(CODE)-$(DATE).zip
 CZIP := $(NAME)-$(CODE)-Clang-$(DATE).zip
