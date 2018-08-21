@@ -27,6 +27,32 @@
 		bootargs = "readahead=2m boot_cpus=0,1,2,3,4,5,6,7";
 	};
 
+	firmware: firmware {
+		android {
+			compatible = "android,firmware";
+			fstab {
+				compatible = "android,fstab";
+				vendor {
+					compatible = "android,vendor";
+					dev = "/dev/block/platform/soc/7824900.sdhci/by-name/vendor";
+					type = "ext4";
+					mnt_flags = "ro,barrier=1,discard,noatime";
+					fsmgr_flags = "wait";
+					status = "ok";
+				};
+				system {
+					compatible = "android,system";
+					dev = "/dev/block/platform/soc/7824900.sdhci/by-name/system";
+					type = "ext4";
+					mnt_flags = "ro,barrier=1,discard,noatime";
+					fsmgr_flags = "wait";
+					status = "ok";
+				};
+
+			};
+		};
+	};
+
 	reserved-memory {
 		#address-cells = <2>;
 		#size-cells = <2>;
@@ -509,8 +535,6 @@
 		qcom,freq-step = <2>;
 		qcom,core-limit-temp = <100>;
 		qcom,core-temp-hysteresis = <10>;
-		qcom,hotplug-temp = <105>;
-		qcom,hotplug-temp-hysteresis = <15>;
 		qcom,freq-mitigation-temp = <105>;
 		qcom,freq-mitigation-temp-hysteresis = <15>;
 		qcom,freq-mitigation-value = <1036800>;
@@ -891,121 +915,102 @@
 		reg-names = "cc_base";
 		vdd_gfx-supply = <&gfx_vreg_corner>;
 		qcom,gfxfreq-corner =
-			<         0   0 >,
-			< 133330000   1 >,  /* Min SVS               */
-			< 216000000   2 >,  /* Low SVS               */
-			< 320000000   3 >,  /* SVS                   */
-			< 400000000   4 >,  /* SVS Plus              */
-			< 510000000   5 >,  /* NOM                   */
-			< 560000000   6 >,  /* Nom Plus              */
-			< 650000000   7 >,  /* Hello, I'm normal     */
-			< 670000000   8 >,
-			< 700000000   9 >,  /* Blast-off             */
-			< 750000000  10 >;  /* WOKE                  */
+			< 0x0         0x0 >,
+			< 0x7F27450   0x1 >,  /* Min SVS   */
+			< 0xCDFE600   0x2 >,  /* Low SVS   */
+			< 0x1312D000  0x3 >,  /* SVS       */
+			< 0x17D78400  0x4 >,  /* SVS Plus  */
+			< 0x1E65FB80  0x5 >,  /* NOM       */
+			< 0x2160EC00  0x6 >,  /* Nom Plus  */
+			< 0x26BE3680  0x7 >,  /* Turbo     */
+			< 0x29B92700  0x7 >,  /* Turbo     */
+			< 0x2B369F40  0x7 >;  /* Turbo     */
 		#clock-cells = <1>;
 	};
 
 	clock_cpu: qcom,cpu-clock-8953@b116000 {
 		compatible = "qcom,cpu-clock-8953";
-		reg =   <0xb114000  0x68>,
-			<0xb014000  0x68>,
-			<0xb116000  0x400>,
-			<0xb111050  0x08>,
-			<0xb011050  0x08>,
-			<0xb1d1050  0x08>,
-			<0x00a4124  0x08>;
+		reg =   <0xB114000  0x68>,
+						<0xB114000  0x68>,
+						<0xB116000  0x400>,
+						<0xB111050  0xC>,
+						<0xB011050  0xC>,
+						<0xB1D1050  0xC>,
+						<0xA4124    0xC>;
+
 		reg-names = "rcgwr-c0-base", "rcgwr-c1-base",
-			    "c0-pll", "c0-mux", "c1-mux",
-			    "cci-mux", "efuse";
+					"c0-pll", "c0-mux", "c1-mux",
+					"cci-mux", "efuse";
+
+		/* RCGwR settings */
+		/* why they didn't put this in first place? */
+		qcom,num-clusters  = < 0x2				>;
+		qcom,lmh-sid-c0  =   < 0x30 0x77706DB	>,
+							 < 0x34 0x5550249	>,
+							 < 0x38 0x111		>;
+		qcom,link-sid-c0 =   < 0x40 0xFC987		>;
+		qcom,dfs-sid-c0  =   < 0x10 0xFEFEBFF7	>,
+							 < 0x14 0xFDFF7FEF	>,
+							 < 0x18 0xFBFFDEFB	>,
+							 < 0x1C 0xB69B5555	>,
+							 < 0x20 0x24929249	>,
+							 < 0x24 0x49241112	>,
+							 < 0x28 0x11112111	>,
+							 < 0x2C 0x8102		>;
+		qcom,lmh-sid-c1  =   < 0x30 0x77706DB	>,
+							 < 0x34 0x5550249	>,
+							 < 0x38 0x111		>;
+		qcom,link-sid-c1 =   < 0x40 0xFC987		>;
+		qcom,dfs-sid-c1  =   < 0x10 0xFEFEBFF7	>,
+							 < 0x14 0xFDFF7FEF	>,
+							 < 0x18 0xFBFFDEFB	>,
+							 < 0x1C 0xB69B5555	>,
+							 < 0x20 0x24929249	>,
+							 < 0x24 0x49241112	>,
+							 < 0x28 0x11112111	>,
+							 < 0x2C 0x8102		>;
+
 		vdd-mx-supply = <&pm8953_s7_level_ao>;
 		vdd-cl-supply = <&apc_vreg>;
 		clocks = <&clock_gcc clk_xo_a_clk_src>;
 		clock-names = "xo_a";
-		qcom,num-clusters = <2>;
-		qcom,speed0-bin-v0-cl =
-			<          0 0>,
-			<  652800000 1>,
-			< 1036800000 2>,
-			< 1401600000 3>,
-			< 1689600000 4>,
-			< 1804800000 5>,
-			< 1958400000 6>,
-			< 2016000000 7>;
-		qcom,speed0-bin-v0-cci =
-			<          0 0>,
-			<  261120000 1>,
-			<  414720000 2>,
-			<  560640000 3>,
-			<  675840000 4>,
-			<  721920000 5>,
-			<  783360000 6>,
-			<  806400000 7>;
-		qcom,speed2-bin-v0-cl =
-			<          0 0>,
-			<  652800000 1>,
-			< 1036800000 2>,
-			< 1401600000 3>,
-			< 1689600000 4>,
-			< 1804800000 5>,
-			< 1958400000 6>,
-			< 2016000000 7>;
-		qcom,speed2-bin-v0-cci =
-			<          0 0>,
-			<  261120000 1>,
-			<  414720000 2>,
-			<  560640000 3>,
-			<  675840000 4>,
-			<  721920000 5>,
-			<  783360000 6>,
-			<  806400000 7>;
-		qcom,speed7-bin-v0-cl =
-			<          0 0>,
-			<  652800000 1>,
-			< 1036800000 2>,
-			< 1401600000 3>,
-			< 1689600000 4>,
-			< 1804800000 5>,
-			< 1958400000 6>,
-			< 2016000000 7>,
-			< 2150400000 8>,
-			< 2208000000 9>;
-		qcom,speed7-bin-v0-cci =
-			<          0 0>,
-			<  261120000 1>,
-			<  414720000 2>,
-			<  560640000 3>,
-			<  675840000 4>,
-			<  721920000 5>,
-			<  783360000 6>,
-			<  806400000 7>,
-			<  860160000 8>,
-			<  883200000 9>;
-		qcom,speed6-bin-v0-cl =
-			<          0 0>,
-			<  652800000 1>,
-			< 1036800000 2>,
-			< 1401600000 3>,
-			< 1689600000 4>,
-			< 1804800000 5>;
-		qcom,speed6-bin-v0-cci =
-			<          0 0>,
-			<  261120000 1>,
-			<  414720000 2>,
-			<  560640000 3>,
-			<  675840000 4>,
-			<  721920000 5>;
+
+		/* FIXME : I'm really curious why Qualcomm did this complex speed-bin on this, is this Ducktales? */
+		/* FIXME : Our global speed-bin is speed1-bin, keep other speed-bin same for regulator identifier */
+		qcom,speed0-bin-v0-cl = <0 0>,
+					< 195000000   1 >,
+					< 292500000   2 >,
+					< 585000000   3 >,
+					< 780000000   4 >,
+					< 975000000   5 >,
+					< 1170000000  6 >,
+					< 1365000000  7 >,
+					< 1560000000  8 >,
+					< 1755000000  9 >,
+					< 1950000000 10 >,
+					< 2150400000 11 >;
+		qcom,speed0-bin-v0-cci =<0 0>,
+					< 141920000   1 >,
+					< 161120000   2 >,
+					< 175840000   3 >,
+					< 183360000   4 >,
+					< 261120000   5 >,
+					< 414720000   6 >,
+					< 560640000   7 >,
+					< 675840000   8 >,
+					< 737280000   9 >,
+					< 783360000  10 >,
+					< 806400000  11 >;
 		#clock-cells = <1>;
 	};
 
 	msm_cpufreq: qcom,msm-cpufreq {
 		compatible = "qcom,msm-cpufreq";
-		clock-names = 
-				"l2_clk", "cpu0_clk", "cpu1_clk", "cpu2_clk",
-				"cpu3_clk", "cpu4_clk", "cpu5_clk", "cpu6_clk", 
-				"cpu7_clk", "cpu8_clk", "cpu9_clk", "cpu10_clk", 
-				"cpu11_clk", "cpu12_clk", "cpu13_clk", "cpu14_clk";
+		clock-names = "l2_clk", 
+						"cpu0_clk", "cpu1_clk", "cpu2_clk", "cpu3_clk", 
+						"cpu4_clk", "cpu5_clk", "cpu6_clk", "cpu7_clk",
+						"cpu8_clk", "cpu9_clk", "cpu10_clk", "cpu11_clk";
 		clocks = <&clock_cpu clk_cci_clk>,
-			 <&clock_cpu clk_a53_pwr_clk>,
 			 <&clock_cpu clk_a53_pwr_clk>,
 			 <&clock_cpu clk_a53_pwr_clk>,
 			 <&clock_cpu clk_a53_pwr_clk>,
@@ -1021,21 +1026,17 @@
 
 		qcom,cpufreq-table =
 			/* TODO: More Ducktales */
-			<  115200 >,
-			<  307200 >,
-			<  403200 >,
-			<  556800 >,
-			<  652800 >,
-			< 1036800 >,
-			< 1401600 >,
-			< 1689600 >,
-			< 1843200 >,
-			< 1958400 >,
-			< 2016000 >,
-			< 2150400 >,
-			< 2208000 >,
-			< 2304000 >,
-			< 2400000 >;
+			<195000>,
+			<292500>,
+			<585000>,
+			<780000>,
+			<975000>,
+			<1170000>,
+			<1365000>,
+			<1560000>,
+			<1755000>,
+			<1950000>,
+			<2150400>;
 	};
 
 	cpubw: qcom,cpubw {
@@ -1089,26 +1090,24 @@
 		cpubw-cpufreq {
 		target-dev = <&cpubw>;
 		cpu-to-dev-map = 
-					<  115200  1525 >,
-					<  307200  1525 >,
-					<  403200  1525 >,
-					<  480000  1525 >,
-					<  556800  2288 >,
-					<  652800  2288 >,
-					< 1036800  4066 >,
-					< 1401600  5126 >,
-					< 1689600  5928 >,
-					< 1843200  7904 >,
-					< 1958400  9887 >,
-					< 2208000  11863>,
-					< 2400000  13763>;
+					<  195000  1525 >,
+					<  292500  2288 >,
+					<  585000  2288 >,
+					<  780000  3509 >,
+					<  975000  3509 >,
+					< 1170000  5126 >,
+					< 1365000  5928 >,
+					< 1560000  7904 >,
+					< 1755000  9887 >,
+					< 1950000  11863>,
+					< 2150400  13763>;
 		};
 
 		mincpubw-cpufreq {
 			target-dev = <&mincpubw>;
 			cpu-to-dev-map = 
-					 <2208000 1525>,
-					 <2400000 5126>;
+					 <1950000 3509>,
+					 <2150400 5126>;
 		};
 	};
 
