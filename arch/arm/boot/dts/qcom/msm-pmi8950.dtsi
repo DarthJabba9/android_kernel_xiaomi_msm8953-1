@@ -331,8 +331,6 @@
 			qcom,fg-cutoff-voltage-mv = <3400>;
 			qcom,cycle-counter-en;
 			qcom,capacity-learning-on;
-			qcom,fg-cc-cv-threshold-mv =<4390>;
-			qcom,vbat-estimate-diff-mv = <200>;
 			qcom,fg-soc@4000 {
 			status = "okay";
 				reg = <0x4000 0x100>;
