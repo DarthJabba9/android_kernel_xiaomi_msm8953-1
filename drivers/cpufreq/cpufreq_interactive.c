@@ -1459,7 +1459,7 @@ static ssize_t store_screen_off_maxfreq(
 	if (ret < 0)
 		return ret;
 
-	if (val < 652800)
+	if (val < 195000)
 		tunables->screen_off_max = DEFAULT_SCREEN_OFF_MAX;
 	else
 		tunables->screen_off_max = val;
