@@ -44,7 +44,7 @@ export KBUILD_BUILD_HOST="Warnet-Nettaholic-2"
 
 #Misc
 CONFIG=genom_defconfig
-THREAD="-j4"
+THREAD="-j8"
 
 # Here We Go
 echo -e "$cyan---------------------------------------------------------------------";
@@ -78,7 +78,7 @@ read TC
   if [[ "$TC" == "1" ]]; then
   echo -e "\n$green building with stock GCC..."
   CROSS_COMPILE+="ccache "
-  CROSS_COMPILE+="$PWD/toolchain/stock/bin/aarch64-linux-android-"
+  CROSS_COMPILE+="/usr/bin/aarch64-linux-gnu-"
   export CROSS_COMPILE
   make  O=out $CONFIG $THREAD
   make  O=out CONFIG_NO_ERROR_ON_MISMATCH=y CONFIG_DEBUG_SECTION_MISMATCH=y $THREAD & pid=$!   

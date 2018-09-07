@@ -36,7 +36,6 @@ dump_boot;
 
 # inject init
 insert_line init.rc "import /init.ramakun.rc" after "import /init.usb.configfs.rc" "import /init.ramakun.rc";
-insert_line init.rc "import /init.spectrum.rc" after "import /init.ramakun.rc" "import /init.spectrum.rc";
 
 # sepolicy
 $bin/magiskpolicy --load sepolicy --save sepolicy \
