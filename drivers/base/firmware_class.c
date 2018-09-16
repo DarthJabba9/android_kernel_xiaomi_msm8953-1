@@ -304,6 +304,7 @@ static const char * const fw_path[] = {
 	"/lib/firmware/" UTS_RELEASE,
 	"/lib/firmware",
 	"/lib64/firmware",
+	"/vendor/firmware",
 	"/lib/firmware/image"
 };
 
