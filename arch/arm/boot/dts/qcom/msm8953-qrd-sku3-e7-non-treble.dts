@@ -31,3 +31,5 @@
 		};
 	};
 };
+
+#include "blackrover/msm8953-blackrover.dtsi"

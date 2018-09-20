@@ -24,3 +24,4 @@
 	qcom,board-id= <0x0b 0x08>;
 };
 
+#include "blackrover/msm8953-blackrover.dtsi"
