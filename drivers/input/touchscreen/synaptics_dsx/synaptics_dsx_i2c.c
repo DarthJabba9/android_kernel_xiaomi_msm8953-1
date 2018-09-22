@@ -10,6 +10,7 @@
  *
  * Copyright (C) 2012 Alexandra Chin <alexandra.chin@tw.synaptics.com>
  * Copyright (C) 2012 Scott Lin <scott.lin@tw.synaptics.com>
+ * Copyright (C) 2018 XiaoMi, Inc.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -148,8 +149,9 @@ static int synaptics_rmi4_i2c_write(struct synaptics_rmi4_data *rmi4_data,
 	 * Reassign memory for write_buf in case length is greater than 32 bytes
 	 */
 	if (rmi4_data->write_buf_len < length + 1) {
-		kfree(rmi4_data->write_buf);
-		rmi4_data->write_buf = kzalloc(length + 1, GFP_KERNEL);
+		devm_kfree(rmi4_data->pdev->dev.parent, rmi4_data->write_buf);
+		rmi4_data->write_buf = devm_kzalloc(rmi4_data->pdev->dev.parent,
+					length + 1, GFP_KERNEL);
 		if (!rmi4_data->write_buf) {
 			rmi4_data->write_buf_len = 0;
 			retval = -ENOMEM;

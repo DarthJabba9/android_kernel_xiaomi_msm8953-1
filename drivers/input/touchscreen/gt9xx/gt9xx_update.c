@@ -2,6 +2,7 @@
  *
  * 2010 - 2012 Goodix Technology.
  * Copyright (c) 2013-2016, The Linux Foundation. All rights reserved.
+ * Copyright (C) 2018 XiaoMi, Inc.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -564,8 +565,8 @@ static s8 gup_update_config(struct i2c_client *client,
 		!memcmp(&pid[GTP_ADDR_LENGTH], "960", 3)) {
 		chip_cfg_len = 228;
 	}
-	pr_debug("config file ASCII len: %zu", cfg->size);
-	pr_debug("need config binary len: %u", chip_cfg_len);
+	pr_debug("config file ASCII len:%d", cfg->size);
+	pr_debug("need config binary len:%d", chip_cfg_len);
 	if ((cfg->size + 5) < chip_cfg_len * 5) {
 		pr_err("Config length error");
 		return -EINVAL;
@@ -644,7 +645,7 @@ static s32 gup_get_firmware_file(struct i2c_client *client,
 		return -EEXIST;
 	}
 
-	dev_dbg(&client->dev, "Config File: %s size: %zu", path, fw->size);
+	dev_dbg(&client->dev, "Config File: %s size=%d", path, fw->size);
 	msg->fw_data =
 		devm_kzalloc(&client->dev, fw->size, GFP_KERNEL);
 	if (!msg->fw_data) {
