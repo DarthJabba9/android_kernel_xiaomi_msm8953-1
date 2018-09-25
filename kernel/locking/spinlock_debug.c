@@ -1,4 +1,4 @@
-/*
+f/*
  * Copyright 2005, Red Hat, Inc., Ingo Molnar
  * Released under the General Public License (GPL).
  *
@@ -12,7 +12,6 @@
 #include <linux/debug_locks.h>
 #include <linux/delay.h>
 #include <linux/export.h>
-#include <linux/bug.h>
 #include <soc/qcom/watchdog.h>
 
 void __raw_spin_lock_init(raw_spinlock_t *lock, const char *name,
