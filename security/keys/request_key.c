@@ -320,6 +320,15 @@ static int construct_get_dest_keyring(struct key **_dest_keyring)
 			BUG();
 		}
 
+		/*
+		 * Require Write permission on the keyring.  This is essential
+		 * because the default keyring may be the session keyring, and
+		 * joining a keyring only requires Search permission.
+		 *
+		 * However, this check is skipped for the "requestor keyring" so
+		 * that /sbin/request-key can itself use request_key() to add
+		 * keys to the original requestor's destination keyring.
+		 */
 		if (dest_keyring && do_perm_check) {
 			ret = key_permission(make_key_ref(dest_keyring, 1),
 					     KEY_NEED_WRITE);
@@ -429,6 +438,7 @@ link_check_failed:
 
 link_prealloc_failed:
 	mutex_unlock(&user->cons_lock);
+	key_put(key);
 	kleave(" = %d [prelink]", ret);
 	return ret;
 
@@ -457,6 +467,15 @@ static struct key *construct_key_and_link(struct keyring_search_context *ctx,
 	ret = construct_get_dest_keyring(&dest_keyring);
 	if (ret)
 		goto error;
+
+	if (ctx->index_key.type == &key_type_keyring)
+		return ERR_PTR(-EPERM);
+
+	user = key_user_lookup(current_fsuid());
+	if (!user) {
+		ret = -ENOMEM;
+		goto error_put_dest_keyring;
+	}
 
 	user = key_user_lookup(current_fsuid());
 	if (!user) {

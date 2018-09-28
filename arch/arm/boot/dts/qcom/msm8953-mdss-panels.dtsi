@@ -29,6 +29,8 @@
 #include "dsi-panel-otm1911-fhdplus-video.dtsi"
 #include "dsi-panel-ili7807-fhdplus-video.dtsi"
 #include "dsi-panel-hx8399c-fhdplus-video.dtsi"
+#include "dsi-panel-hx83100a-800p-video.dtsi"
+
 &soc {
 	dsi_panel_pwr_supply: dsi_panel_pwr_supply {
 		#address-cells = <1>;
@@ -132,4 +134,12 @@
 		24 1B 08 09 05 03 04 a0];
 		qcom,mdss-dsi-t-clk-post = <0x0d>;
 		qcom,mdss-dsi-t-clk-pre = <0x30>;
+};
+
+&dsi_boyi_hx83100a_800p_video {
+	qcom,mdss-dsi-panel-timings-phy-v2 = [1f 1c 05 06 03 03 04 a0
+		1f 1c 05 06 03 03 04 a0
+		1f 1c 05 06 03 03 04 a0
+		1f 1c 05 06 03 03 04 a0
+		1f 10 05 06 03 03 04 a0];
 };
