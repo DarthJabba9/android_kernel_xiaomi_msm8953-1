@@ -473,6 +473,7 @@ module_param_named(
 	int, S_IRUSR | S_IWUSR
 );
 
+static int hvdcp_type;
 #define WIPOWER_DEFAULT_HYSTERISIS_UV	250000
 static int wipower_dcin_hyst_uv = WIPOWER_DEFAULT_HYSTERISIS_UV;
 module_param_named(
@@ -1090,7 +1091,11 @@ static int get_prop_battery_charge_full_design(struct smbchg_chip *chip)
 	if (chip->bms_psy) {
 		chip->bms_psy->get_property(chip->bms_psy,
 				POWER_SUPPLY_PROP_CHARGE_FULL_DESIGN, &ret);
-		return ret.intval;
+#ifdef CONFIG_PROJECT_VINCE
+		return 4000000;
+#else
+		return 3080000;
+#endif
 	} else {
 		pr_debug("No BMS supply registered return 0\n");
 	}
@@ -1104,7 +1109,11 @@ static int get_prop_battery_charge_full(struct smbchg_chip *chip)
 	if (chip->bms_psy) {
 		chip->bms_psy->get_property(chip->bms_psy,
 			  POWER_SUPPLY_PROP_CHARGE_FULL, &ret);
-		return ret.intval;
+#ifdef CONFIG_PROJECT_VINCE
+		return 4000000;
+#else
+		return 3080000;
+#endif
 	} else {
 		pr_debug("No BMS supply registered return 0\n");
 	}
@@ -3072,7 +3081,11 @@ static int smbchg_system_temp_level_set(struct smbchg_chip *chip,
 	int rc = 0;
 	int prev_therm_lvl;
 	int thermal_icl_ma;
-
+#if defined(CONFIG_PROJECT_VINCE) && defined(GLOBAL_THERMAL)
+	unsigned int	hvdcp_thermal_mitigation[7] = {2500, 2500, 1500, 1000, 1000, 500, 0};
+#elif defined(CONFIG_PROJECT_VINCE)
+	unsigned int	hvdcp_thermal_mitigation[7] = {2500, 2500, 2500, 1000, 1000, 500, 0};
+#endif
 	if (!chip->thermal_mitigation) {
 		dev_err(chip->dev, "Thermal mitigation not supported\n");
 		return -EINVAL;
@@ -3126,8 +3139,18 @@ static int smbchg_system_temp_level_set(struct smbchg_chip *chip,
 			pr_err("Couldn't disable DC thermal ICL vote rc=%d\n",
 				rc);
 	} else {
+#if defined(CONFIG_PROJECT_VINCE)
+		if (hvdcp_type == POWER_SUPPLY_TYPE_USB_HVDCP || hvdcp_type == POWER_SUPPLY_TYPE_USB_HVDCP_3) {
+		thermal_icl_ma =
+			(int)hvdcp_thermal_mitigation[chip->therm_lvl_sel];
+		} else{
 		thermal_icl_ma =
 			(int)chip->thermal_mitigation[chip->therm_lvl_sel];
+		}
+#else
+		thermal_icl_ma =
+			(int)chip->thermal_mitigation[chip->therm_lvl_sel];
+#endif
 		rc = vote(chip->usb_icl_votable, THERMAL_ICL_VOTER, true,
 					thermal_icl_ma);
 		if (rc < 0)
@@ -4551,7 +4574,11 @@ static void smbchg_cool_limit_work(struct work_struct *work)
 	}
 	if (temp > 50 && temp < 150) {
 		mutex_lock(&chip->cool_current);
-		rc = smbchg_fastchg_current_comp_set(chip,1200);
+		#ifdef CONFIG_PROJECT_VINCE
+		rc = smbchg_fastchg_current_comp_set(chip, 1200);
+		#else
+		rc = smbchg_fastchg_current_comp_set(chip, 900);
+		#endif
 		mutex_unlock(&chip->cool_current);
 	}
 
@@ -4726,6 +4753,7 @@ static int smbchg_change_usb_supply_type(struct smbchg_chip *chip,
 	 * modes, skip all BC 1.2 current if external typec is supported.
 	 * Note: for SDP supporting current based on USB notifications.
 	 */
+	hvdcp_type = type;
 	if (chip->typec_psy && (type != POWER_SUPPLY_TYPE_USB))
 		current_limit_ma = chip->typec_current_ma;
 	else if (type == POWER_SUPPLY_TYPE_USB)
@@ -7842,7 +7870,11 @@ err:
 }
 
 #define DEFAULT_VLED_MAX_UV		3500000
+#ifdef CONFIG_PROJECT_VINCE
+#define DEFAULT_FCC_MA			2500
+#else
 #define DEFAULT_FCC_MA			2000
+#endif
 static int smb_parse_dt(struct smbchg_chip *chip)
 {
 	int rc = 0, ocp_thresh = -EINVAL;
@@ -8681,8 +8713,13 @@ static int smbchg_probe(struct spmi_device *spmi)
 		goto votables_cleanup;
 	}
 
+	#ifdef CONFIG_PROJECT_VINCE
+	printk("[SMBCHG]hvdcp enable\n");
+	chip->hvdcp_not_supported = false;
+	#else
 	printk("[SMBCHG]hvdcp disable\n");
 	chip->hvdcp_not_supported = true;
+	#endif
 
 	rc = smbchg_check_chg_version(chip);
 	if (rc) {

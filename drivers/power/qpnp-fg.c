@@ -6314,7 +6314,7 @@ fail:
 	return -EINVAL;
 }
 
-#ifdef FACTORY_VERSION_ENABLE
+#ifdef CONFIG_PROJECT_VINCE
 #define REDO_BATID_DURING_FIRST_EST BIT(4)
 static void fg_hw_restart(struct fg_chip *chip)
 {
@@ -6324,25 +6324,25 @@ static void fg_hw_restart(struct fg_chip *chip)
 
 	reg = 0x80;
 	batt_id = get_sram_prop_now(chip, FG_DATA_BATT_ID);
-	printk("fg_hw_restart old battery id = %d\n",batt_id);
+	printk("fg_hw_restart old battery id = %d\n", batt_id);
 
-	fg_masked_write(chip, 0x4150,reg, reg, 1);
+	fg_masked_write(chip, 0x4150, reg, reg, 1);
 
-	fg_masked_write(chip, chip->soc_base + SOC_RESTART,0xFF, 0, 1);
+	fg_masked_write(chip, chip->soc_base + SOC_RESTART, 0xFF, 0, 1);
 	mdelay(5);
 
 	reg = REDO_BATID_DURING_FIRST_EST|REDO_FIRST_ESTIMATE;
 
-	fg_masked_write(chip, chip->soc_base + SOC_RESTART,reg, reg, 1);
+	fg_masked_write(chip, chip->soc_base + SOC_RESTART, reg, reg, 1);
 	mdelay(5);
 
-	reg = REDO_BATID_DURING_FIRST_EST |REDO_FIRST_ESTIMATE| RESTART_GO;
+	reg = REDO_BATID_DURING_FIRST_EST | REDO_FIRST_ESTIMATE | RESTART_GO;
 
-	fg_masked_write(chip, chip->soc_base + SOC_RESTART,reg, reg, 1);
+	fg_masked_write(chip, chip->soc_base + SOC_RESTART, reg, reg, 1);
 	mdelay(1000);
 
-	fg_masked_write(chip, chip->soc_base + SOC_RESTART,0xFF, 0, 1);
-	fg_masked_write(chip, 0x4150,0x80, 0, 1);
+	fg_masked_write(chip, chip->soc_base + SOC_RESTART, 0xFF, 0, 1);
+	fg_masked_write(chip, 0x4150, 0x80, 0, 1);
 
 	mdelay(2000);
 
@@ -6355,7 +6355,7 @@ static void fg_hw_restart(struct fg_chip *chip)
 	}
 
 	batt_id = get_sram_prop_now(chip, FG_DATA_BATT_ID);
-	printk("fg_hw_restart new batt_id=%d\n",batt_id);
+	printk("fg_hw_restart new batt_id=%d\n", batt_id);
 }
 #endif
 
@@ -6378,8 +6378,11 @@ static int fg_batt_profile_init(struct fg_chip *chip)
 	int rc = 0, ret;
 	int len;
 
-	#ifdef FACTORY_VERSION_ENABLE
-	int batt_id = 0, match = 0;
+	#ifdef CONFIG_PROJECT_VINCE
+	int i;
+	int batts_id_ohm[3] = {24000, 40000, 50000};
+	int delta = 0, limit = 0, batt_id = 0, match = 0, id_range_pct = 5;
+	bool in_range = false;
 	#endif
 
 	struct device_node *node = chip->spmi->dev.of_node;
@@ -6388,25 +6391,26 @@ static int fg_batt_profile_init(struct fg_chip *chip)
 	bool tried_again = false, vbat_in_range, profiles_same;
 	u8 reg = 0;
 
-	#ifdef FACTORY_VERSION_ENABLE
+	#ifdef CONFIG_PROJECT_VINCE
 	batt_id = get_sram_prop_now(chip, FG_DATA_BATT_ID);
-	printk("batt_id_ohm=%d\n",batt_id);
-
-	if (batt_id >= SCUD_ID_MIN && batt_id <= SCUD_ID_MAX) {
-		match = 1;
-		printk("SCUD match succ.\n");
-	} else if (batt_id >= COSLIGHT_ID_MIN && batt_id <= COSLIGHT_ID_MAX) {
-		match = 1;
-		printk("COSLIGHT match succ.\n");
-	} else if (batt_id >= SUNWODA_ID_MIN && batt_id <= SUNWODA_ID_MAX) {
-		match = 1;
-		printk("SUNWODA match succ.\n");
+	printk("batt_id_ohm=%d\n", batt_id);
+	for (i = 0; i < 3; i++) {
+	delta = abs(batts_id_ohm[i] - batt_id);
+	printk("delta=%d\n", delta);
+	limit = (batts_id_ohm[i] * id_range_pct / 100);
+	printk("limit=%d\n", limit);
+	in_range = (delta <= limit);
+	printk("in_range=%d\n", in_range);
+		if (in_range != 0) {
+			match = 1;
+			printk("match=%d\n", match);
+		}
 	}
 	if (match == 0) {
 		fg_hw_restart(chip);
 		printk("re-read bat id\n");
 	}
-	printk("batt_id=%d\n",get_sram_prop_now(chip, FG_DATA_BATT_ID));
+	printk("batt_id=%d\n", get_sram_prop_now(chip, FG_DATA_BATT_ID));
 	#endif
 
 wait:
@@ -7188,8 +7192,13 @@ static int fg_of_init(struct fg_chip *chip)
 	OF_READ_PROPERTY(chip->evaluation_current,
 			"aging-eval-current-ma", rc,
 			DEFAULT_EVALUATION_CURRENT_MA);
+#if defined(CONFIG_PROJECT_VINCE) && defined(GLOBAL_CC_CV_THRESHOLD_MV)
+	OF_READ_PROPERTY(chip->cc_cv_threshold_mv,
+			"fg-cc-cv-threshold-mv-global", rc, 0);
+#else
 	OF_READ_PROPERTY(chip->cc_cv_threshold_mv,
 			"fg-cc-cv-threshold-mv", rc, 0);
+#endif
 	if (of_property_read_bool(chip->spmi->dev.of_node,
 				"qcom,capacity-learning-on"))
 		chip->batt_aging_mode = FG_AGING_CC;
