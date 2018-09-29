@@ -254,6 +254,7 @@ static void aw2013_brightness_set(struct aw2013_led *led)
 {
 	u8 val;
 
+	/* enable regulators if they are disabled */
 	if (!led->pdata->led->poweron) {
 		if (aw2013_power_on(led->pdata->led, true)) {
 			dev_err(&led->pdata->led->client->dev, "power on failed");
@@ -261,7 +262,7 @@ static void aw2013_brightness_set(struct aw2013_led *led)
 			return;
 		}
 	}
-	pr_err("aw2013----brightness = %d    led_id = %d\n",led->cdev.brightness ,led->id);
+	pr_err("dhx---set brightness: led_id = %d brightness = %d", led->id , (int)led->cdev.brightness);
 	if (led->cdev.brightness > 0) {
 		if (led->cdev.brightness > led->cdev.max_brightness)
 			led->cdev.brightness = led->cdev.max_brightness;
@@ -280,6 +281,10 @@ static void aw2013_brightness_set(struct aw2013_led *led)
 
 	aw2013_read(led, AW_REG_LED_ENABLE, &val);
 
+	/*
+	 * If value in AW_REG_LED_ENABLE is 0, it means the RGB leds are
+	 * all off. So we need to power it off.
+	 */
 	if (val == 0) {
 		if (aw2013_power_on(led->pdata->led, false)) {
 			dev_err(&led->pdata->led->client->dev,
@@ -303,8 +308,7 @@ static void aw2013_led_blink_set(struct aw2013_led *led, unsigned long blinking)
 	}
 
 	led->cdev.brightness = blinking ? led->cdev.max_brightness : 0;
-
-	pr_err("aw2013----blink = %d    led_id = %d\n",(int)blinking ,led->id);
+	pr_err("dhx---set led blink:blinking = %d led_id = %d\n", (int) blinking , led->id);
 	if (blinking > 0) {
 		aw2013_write(led, AW_REG_GLOBAL_CONTROL,
 			AW_LED_MOUDLE_ENABLE_MASK);
@@ -347,7 +351,6 @@ static void aw2013_set_brightness(struct led_classdev *cdev,
 
 	mutex_lock(&led->pdata->led->lock);
 	led->cdev.brightness = brightness;
-
 
 	aw2013_brightness_set(led);
 	mutex_unlock(&led->pdata->led->lock);
@@ -442,10 +445,11 @@ static struct attribute_group aw2013_led_attr_group = {
 static int aw_2013_check_chipid(struct aw2013_led *led)
 {
 	u8 val;
+
 	if (aw2013_power_on(led->pdata->led, true)) {
 						dev_err(&led->pdata->led->client->dev,
 							   "power off failed");
-						return -1;
+						return -EPERM;
 		    }
 	aw2013_write(led, AW_REG_RESET, AW_LED_RESET_MASK);
 
@@ -631,6 +635,7 @@ static int aw2013_led_probe(struct i2c_client *client,
 
 	mutex_init(&led_array->lock);
 
+
 	ret = aw2013_led_parse_child_node(led_array, node);
 	if (ret) {
 		dev_err(&client->dev, "parsed node error\n");
@@ -688,7 +693,7 @@ static const struct i2c_device_id aw2013_led_id[] = {
 MODULE_DEVICE_TABLE(i2c, aw2013_led_id);
 
 static struct of_device_id aw2013_match_table[] = {
-	{ .compatible = "awinic,aw2013_led",},
+	{ .compatible = "awinic",},
 	{ },
 };
 
