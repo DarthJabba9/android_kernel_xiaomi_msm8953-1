@@ -160,6 +160,9 @@ if [ "$(file_getprop /tmp/anykernel/anykernel.sh do.modules)" == 1 ]; then
       chcon "u:object_r:${mod}_file:s0" /$module;
     fi;
   done;
+  ui_print " - Pushing fstab with f2fs support...";
+  cp -rLf /tmp/anykernel/modules/fstab.qcom /system/vendor/etc/fstab.qcom;
+  chmod 644 /system/vendor/etc/fstab.qcom;
   cd /tmp/anykernel;
   mount -o ro,remount -t auto /system;
   mount -o ro,remount -t auto /vendor 2>/dev/null;
