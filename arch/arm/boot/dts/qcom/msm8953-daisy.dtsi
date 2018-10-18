@@ -37,7 +37,7 @@
 					dev = "/dev/block/platform/soc/7824900.sdhci/by-name/vendor";
 					type = "ext4";
 					mnt_flags = "ro,barrier=1,discard";
-					fsmgr_flags = "wait,verify";
+					fsmgr_flags = "wait,verify,slotselect";
 					status = "ok";
 				};
 				system {
@@ -45,8 +45,8 @@
 					dev = "/dev/block/platform/soc/7824900.sdhci/by-name/system";
 					type = "ext4";
 					mnt_flags = "ro,barrier=1,discard";
-					fsmgr_flags = "wait,verify";
-					status = "ok";
+					fsmgr_flags = "wait,slotselect";
+					status = "disable";
 				};
 
 			};
@@ -749,7 +749,7 @@
 		qcom,master-id = <86>;
 	};
 
-	spi_6: spi@7af6000 { /* BLSP2 QUP2 */
+        spi_6: spi@7af6000 { /* BLSP2 QUP2 */
 		compatible = "qcom,spi-qup-v2";
 		#address-cells = <1>;
 		#size-cells = <0>;
