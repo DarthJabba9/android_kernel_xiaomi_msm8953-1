@@ -4,12 +4,12 @@
 ## AnyKernel setup
 # begin properties
 properties() { '
-kernel.string=Genom Kernel for MIUI ROMs
+kernel.string=Genom Kernel for Sakura Custom Rom
 do.devicecheck=1
 do.modules=0
 do.cleanup=1
 do.cleanuponabort=1
-device.name1=vince
+device.name1=sakura
 '; } # end properties
 
 # shell variables
